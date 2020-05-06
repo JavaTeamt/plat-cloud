@@ -1,0 +1,79 @@
+package com.czkj.role.service;
+
+import com.czkj.common.entity.TabRole;
+import com.czkj.common.entity.TabRolePermission;
+import com.czkj.utils.PageResult;
+
+import java.util.List;
+
+/**
+ * @Author: SunMin
+ * @Description:
+ * @Date:Create：in 2020/4/24 12:49
+ * @Modified By：
+ */
+public interface RoleService {
+
+    /**
+     * 获取所有角色信息
+     * @param page 当前页
+     * @param size 每页显示条数
+     * @param roleName 角色名
+     * @param available 是否可用
+     * @return
+     */
+    PageResult queryRoleList(int page, int size, String roleName, String available);
+
+    /**
+     * 校验角色信息是否存在
+     * @param roleName 角色名
+     * @param roleCode 角色编码
+     * @return
+     */
+    boolean validateRoleExit(String roleName, String roleCode);
+
+    /**
+     * 新增角色信息
+     * @param tabRole 实体类接收参数
+     * @param pids 权限id-可以选择多种权限
+     * @return
+     */
+    boolean saveRole(TabRole tabRole, String[] pids);
+
+    /**
+     * 获取对应指定角色信息及角色对应权限
+     * @param roleId 角色id
+     * @return
+     */
+    TabRole queryRoleById(String roleId);
+
+    /**
+     * 绑定角色权限关系存储关系数据
+     * @param roleId 角色id
+     * @param pids 权限id-多个
+     * @return
+     */
+    boolean savePermissionAndRole(String roleId, String[] pids);
+
+    /**
+     * 修改角色信息
+     * @param tabRole 实体类接收参数
+     * @param pids 权限id-多个
+     */
+    boolean updateRoleById(TabRole tabRole, String[] pids);
+
+
+    /**
+     * 删除指定角色-批量删除
+     * @param roleId 角色id
+     * @return
+     */
+    boolean deleteRole(String roleId);
+
+    /**
+     * 根据角色id查询关系表中是否存在数据
+     * @param roleId
+     * @return
+     */
+    List<TabRolePermission> queryByRoleId(String roleId);
+}
