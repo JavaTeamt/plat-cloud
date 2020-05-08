@@ -28,17 +28,19 @@ public interface RoleService {
      * 校验角色信息是否存在
      * @param roleName 角色名
      * @param roleCode 角色编码
+     * @param keyid 主键id，用于修改校验标识属性
      * @return
      */
-    boolean validateRoleExit(String roleName, String roleCode);
+    boolean validateRoleExit(String roleName, String roleCode,String keyid);
 
     /**
      * 新增角色信息
-     * @param tabRole 实体类接收参数
+     * @param name 角色名
+     * @param code 角色编码
      * @param pids 权限id-可以选择多种权限
      * @return
      */
-    boolean saveRole(TabRole tabRole, String[] pids);
+    boolean saveRole(String name, String code, String[] pids);
 
     /**
      * 获取对应指定角色信息及角色对应权限

@@ -20,6 +20,7 @@ public class JWTUtil {
 
     //密钥
     public static final String SECRET = "sdjhakdhajdklsl;o653632";
+
     //过期时间:秒
     public static final int EXPIRE = 7200;
 

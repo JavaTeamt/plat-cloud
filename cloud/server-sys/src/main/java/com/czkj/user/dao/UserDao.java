@@ -7,6 +7,7 @@ import com.czkj.common.entity.TabSubscriber;
 import com.czkj.common.entity.TabUserRole;
 import com.czkj.utils.PageResult;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -26,9 +27,10 @@ public interface UserDao<T> {
      * 查询用户对应信息是否存在
      * @param key 字段名
      * @param value 值
+     * @param keyId 主键id用于修改校验标识
      * @return
      */
-    TabSubscriber selectUserByKey(String key, String value);
+    TabSubscriber selectUserByKey(String key, String value,String keyId);
 
     /**
      * 修改用户基本信息-用户基本信息
@@ -37,7 +39,7 @@ public interface UserDao<T> {
      * @param headImg 头像
      * @return
      */
-    int updateUserJ(String id, String mobile, String headImg);
+    void updateUserJ(String id, String mobile, String headImg);
 
     /**
      * 修改用户手机密码
@@ -138,19 +140,6 @@ public interface UserDao<T> {
      */
     void deleteUserAndRole(String keyId);
 
-    /**
-     * 根据用户id查询用户角色关系表记录
-     * @param userId 用户id
-     * @return
-     */
-    List<TabUserRole> queryListByUserId(String userId);
 
-    /**
-     * 查询用户角色绑定记录
-     * @param userId 用户id
-     * @param roleId 角色id
-     * @return
-     */
-    TabUserRole queryRow(String userId, String roleId);
 
 }

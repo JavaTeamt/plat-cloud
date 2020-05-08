@@ -19,6 +19,7 @@
         <module>server-oauth2-router</module>
         <module>server-zipkin</module>
         <module>server-sys</module>
+        <module>server-web</module>
     </modules>
 
     <properties>

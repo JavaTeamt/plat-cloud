@@ -3,6 +3,7 @@ package com.czkj.common.entity;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -18,28 +19,28 @@ public class TabSubscriber implements Serializable {
     @ApiModelProperty(value="主键id",name="id")
     private String id;
 
-    @ApiModelProperty(value="手机号",name="mobile")
+    @ApiModelProperty(value="手机号",name="mobile",required = true)
     private String mobile;
 
-    @ApiModelProperty(value="密码",name="password")
+    @ApiModelProperty(value="密码",name="password",required = true)
     private String password;
 
-    @ApiModelProperty(value="客户id",name="custid",readOnly = true)
+    @ApiModelProperty(value="客户id",name="custid",hidden = true)
     private String  custid;
 
-    @ApiModelProperty(value="登录状态",name="loginStatus",readOnly = true)
+    @ApiModelProperty(value="登录状态",name="loginStatus",hidden = true)
     private String loginStatus;
 
-    @ApiModelProperty(value="头像路径",name="headImg",readOnly = true)
+    @ApiModelProperty(value="头像路径",name="headImg",hidden = true)
     private String headImg;
 
-    @ApiModelProperty(value="创建时间",name="createTime",readOnly = true)
-    private String createTime;
+    @ApiModelProperty(value="创建时间",name="createTime",hidden = true)
+    private Date createTime;
 
-    @ApiModelProperty(value="客户实体类",hidden = true)
+    @ApiModelProperty(value="客户实体类",hidden=true)
     private TabCustomer tabCustomer;
 
-    @ApiModelProperty(value="一个用户多个角色",hidden=true)
+    @ApiModelProperty(value="角色实体类集合(一对多)",hidden=true)
     private List<TabRole> tabRoleList;
 
     public String getId() {
@@ -90,11 +91,11 @@ public class TabSubscriber implements Serializable {
         this.headImg = headImg;
     }
 
-    public String getCreateTime() {
+    public Date getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(String createTime) {
+    public void setCreateTime(Date createTime) {
         this.createTime = createTime;
     }
 

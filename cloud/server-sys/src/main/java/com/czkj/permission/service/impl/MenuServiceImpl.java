@@ -1,7 +1,9 @@
 package com.czkj.permission.service.impl;
 
 import com.czkj.common.entity.TabPermission;
+import com.czkj.common.entity.TabPermissionUrl;
 import com.czkj.common.entity.TabRolePermission;
+import com.czkj.common.entity.TabSubscriber;
 import com.czkj.permission.dao.MenuDao;
 import com.czkj.permission.service.MenuService;
 import lombok.extern.slf4j.Slf4j;
@@ -32,51 +34,29 @@ public class MenuServiceImpl implements MenuService {
     private MenuDao menuDao;
 
     @Override
-    public List<TabPermission> queryMenuByParentId(String parentId, String available) {
-        //给予一个标识，选择对应执行方法
-        boolean notButton = false;
-        return getMenuList(parentId, notButton, available);
-    }
-
-    /**
-     * 递归获取菜单列表
-     *
-     * @param parentId  父级id
-     * @param notButton 是否需要查询按钮的标识
-     * @return
-     */
-    private List<TabPermission> getMenuList(String parentId, boolean notButton, String available) {
-
-        List<TabPermission> tabPermissionList = new ArrayList<>();
-        if (notButton) {
-            tabPermissionList = menuDao.queryAllMenuNotButton(parentId);
-        } else {
-            tabPermissionList = menuDao.queryMenuByParentId(parentId, available);
-        }
-        if (tabPermissionList.size() > 0) {
-            for (int i = 0; i < tabPermissionList.size(); i++) {
-                parentId = tabPermissionList.get(i).getId();
-                List<TabPermission> dtos = getMenuList(parentId, notButton, available);
-                tabPermissionList.get(i).setChildMenu(dtos);
-            }
-        }
-        return tabPermissionList;
+    public List<TabPermission> getAllList(String available) {
+        return menuDao.queryAllList(available);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean savePermission(TabPermission tabPermission) {
-        //设置创建时间
-        //设置日期格式
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        tabPermission.setCreateTime(df.format(new Date()));
-        //默认为可用
-        tabPermission.setAvailable("1");
-        if (StringUtils.isBlank(tabPermission.getSortString())){
-            tabPermission.setSortString("0");
-        }
+    public boolean savePermission(String name, String[] urls) {
+        List<String> list = new ArrayList();
         try {
-            menuDao.addPermission(tabPermission);
+            //新增权限，返回主键id
+            String key = menuDao.savePermission(name);
+            //获取url数据，添加权限对应url
+            if (urls != null && urls.length > 0) {
+                //数组去重
+                for (int i = 0; i < urls.length; i++) {
+                    if (!list.contains(urls[i])) {
+                        list.add(urls[i]);
+                    }
+                }
+                for (String url : list.toArray(new String[list.size()])) {
+                    menuDao.savePerUrl(url, key, null);
+                }
+            }
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -86,51 +66,63 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public TabPermission getTabPermission(String id) {
-        return menuDao.selectTabPermissionById(id);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<TabPermission> queryAllMenuNotButton(String parentId) {
-        //给予一个标识，选择对应执行方法
-        boolean notButton = true;
-        return getMenuList(parentId,notButton,"");
+    public TabPermission getPermissionByKey(String key) {
+        return menuDao.queryPermission(key);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean updateTabPermission(TabPermission tabPermission) {
-            try {
-                //手动设置默认属性
-                //设置日期格式
-                SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                tabPermission.setLastUpdateTime(df.format(new Date()));
-
-                menuDao.updateTabPermission(tabPermission);
-                return true;
-            } catch (Exception e) {
-                e.printStackTrace();
-                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+    public boolean updatePerByKey(String name, String key, String[] urls) {
+        List<String> list = new ArrayList();
+        try {
+            //修改权限数据
+            menuDao.updatePermission(name, key);
+            //接收权限对应的URL
+            if (urls != null && urls.length > 0) {
+                //数组去重
+                for (int i = 0; i < urls.length; i++) {
+                    if (!list.contains(urls[i])) {
+                        list.add(urls[i]);
+                    }
+                }
+                //先删除原先url记录,重新添加
+                menuDao.deletePerUrlByPerId(key);
+                for (String url : list.toArray(new String[list.size()])) {
+                    menuDao.savePerUrl(url, key, new Date());
+                }
             }
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+        }
         return false;
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public TabRolePermission selectPermissionAndRole(String pid) {
-        return menuDao.selectPermissionAndRole(pid);
+    public boolean queryExit(String name, String url,String keyId) {
+        if (StringUtils.isNotBlank(name)) {
+            TabPermission tabPermission = menuDao.queryPerByName(name,keyId);
+            if (tabPermission != null) {
+                return false;
+            }
+        }
+        if (StringUtils.isNotBlank(url)) {
+            TabPermissionUrl tabPermissionUrl = menuDao.queryPerUrlByUrl(url);
+            if (tabPermissionUrl != null) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean deleteTabpermission(String id) {
+    public boolean deleteTabpermission(String key) {
         //不进行真正的删除，修改标识为0表示废弃
         try {
-            menuDao.updatePermissionForAvlia("0", id, null);
-            //废弃之后子级也废弃
-            menuDao.updatePermissionForAvlia("0", null, id);
+            menuDao.updatePermissionForAvlia("0", key);
+            menuDao.updatePerUrlAvailable("0", key);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -141,14 +133,20 @@ public class MenuServiceImpl implements MenuService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean enablePermission(String id) {
+    public boolean enablePermission(String key) {
         try {
-            menuDao.updatePermissionForAvlia("1", id, null);
+            menuDao.updatePermissionForAvlia("1", key);
+            menuDao.updatePerUrlAvailable("1", key);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         }
         return false;
+    }
+
+    @Override
+    public TabPermission getPermissionAndRole(String pid) {
+        return menuDao.queryPermissionAndRole(pid);
     }
 }

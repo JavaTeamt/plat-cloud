@@ -3,6 +3,7 @@ package com.czkj.common.entity;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * @author SunMin
@@ -13,7 +14,7 @@ import java.io.Serializable;
 public class TabCustomer implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    @ApiModelProperty(value="主键id",name="id")
+    @ApiModelProperty(value="主键id",name="id",hidden = true)
     private String id;
 
     @ApiModelProperty(value="姓名",name="name")
@@ -28,14 +29,14 @@ public class TabCustomer implements Serializable {
     @ApiModelProperty(value="证件编码",name="certid")
     private String certid;
 
-    @ApiModelProperty(value="实名认证标识",name="custidentify")
+    @ApiModelProperty(value="实名认证标识",name="custidentify",hidden = true)
     private String custidentify;
 
-    @ApiModelProperty(value="客户手机号",name="mobile")
+    @ApiModelProperty(value="客户手机号",name="mobile",hidden = true)
     private String mobile;
 
-    @ApiModelProperty(value="创建时间",name="createtime")
-    private String createtime;
+    @ApiModelProperty(value="创建时间",name="createtime",hidden = true)
+    private Date createtime;
 
     public String getId() {
         return id;
@@ -93,11 +94,11 @@ public class TabCustomer implements Serializable {
         this.mobile = mobile;
     }
 
-    public String getCreatetime() {
+    public Date getCreatetime() {
         return createtime;
     }
 
-    public void setCreatetime(String createtime) {
+    public void setCreatetime(Date createtime) {
         this.createtime = createtime;
     }
 

@@ -34,10 +34,10 @@ public class RoleController {
     private static final Logger log = LoggerFactory.getLogger(RoleController.class);
 
     @ApiOperation(value = "显示角色列表（分页显示）", notes = "显示角色列表（分页显示）")
-    @ApiImplicitParams({@ApiImplicitParam(name = "currentPage", value = "当前页", required = true, dataType = "int"),
-            @ApiImplicitParam(name = "size", value = "每页显示条数", required = true, dataType = "int"),
-            @ApiImplicitParam(name = "roleName", value = " 角色名-用于模糊查询", required = false, dataType = "String"),
-            @ApiImplicitParam(name = "available", value = " 是否可用标识", required =false , dataType = "String")})
+    @ApiImplicitParams({@ApiImplicitParam(name = "currentPage", value = "当前页", paramType = "query", required = true, dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页显示条数", paramType = "query",required = true, dataType = "int"),
+            @ApiImplicitParam(name = "roleName", value = " 角色名-用于模糊查询", paramType = "query", required = false, dataType = "String"),
+            @ApiImplicitParam(name = "available", value = " 是否可用标识", paramType = "query", required =false , dataType = "String")})
     @GetMapping("/getRoleList")
     public PageResult getRoleList(int currentPage, int size, String roleName, String available) {
         return roleService.queryRoleList(currentPage, size, roleName, available);
@@ -49,35 +49,36 @@ public class RoleController {
      * @param code 角色编码
      * @return
      */
-    private Response validateRoleExit(String name, String code) {
+    private Response validateRoleExit(String name, String code,String keyid) {
         log.info("角色名:" + name + "," + "角色编码:" + code);
         if (StringUtils.isNotBlank(name)) {
-            boolean result = roleService.validateRoleExit(name, null);
+            boolean result = roleService.validateRoleExit(name, null,keyid);
             if (!result) {
                 return Response.failure("4015", "角色名已存在");
             }
-            return Response.success().message("角色名可以使用");
-        } else if (StringUtils.isNotBlank(code)) {
-            boolean result = roleService.validateRoleExit(null, code);
+        }
+        if (StringUtils.isNotBlank(code)) {
+            boolean result = roleService.validateRoleExit(null, code,keyid);
             if (!result) {
                 return Response.failure("4016", "角色编码已存在");
             }
-            return Response.success().message("角色编码可以使用");
         }
-        return Response.failure("4017", "请传入数据");
+        return Response.success();
     }
 
     @ApiOperation(value = "保存角色信息", notes = "保存角色信息")
-    @ApiImplicitParam(name = "pids", value = "权限id-多个权限", required = false, dataType ="String[]")
+    @ApiImplicitParams({@ApiImplicitParam( name = "name", value = "角色名", paramType = "query",required = true, dataType ="String"),
+            @ApiImplicitParam( name = "code", value = "角色编码",paramType = "query", required = true, dataType ="String"),
+            @ApiImplicitParam( name = "pids", value = "权限id-多个权限",paramType = "query", allowMultiple = true,required = false, dataType ="String")})
     @PostMapping("/saveRole")
-    public Response saveRole(TabRole tabRole, String[] pids) {
-        log.info("角色名:" + tabRole.getName(), "," + "角色编码:" + tabRole.getCode());
+    public Response saveRole(String name,String code, String[] pids) {
+        log.info("角色名:" + name, "," + "角色编码:" + code);
         log.info("权限id:" + pids);
-        Response response = validateRoleExit(tabRole.getName(), tabRole.getCode());
+        Response response = validateRoleExit(name,code,null);
         //验证成功则进行添加
         if (response.getCode().equals("0")) {
             log.info("检验结果:" + response.getCode());
-            boolean result = roleService.saveRole(tabRole, pids);
+            boolean result = roleService.saveRole(name,code, pids);
             if (result) {
                 return Response.success().message("保存成功");
             }
@@ -95,19 +96,24 @@ public class RoleController {
     }
 
     @ApiOperation(value = "修改指定角色信息", notes = "修改指定角色信息")
-    @ApiImplicitParam(name = "pids", value = "权限id", required = false, dataType ="String[]")
+    @ApiImplicitParam(name = "pids", value = "权限id", required = false, paramType ="query",allowMultiple = true,dataType ="String")
     @PutMapping("/updateRole")
-    public Response updateRole(TabRole tabRole, String[] pids) {
-        log.info("权限id:" + pids);
-        boolean result = roleService.updateRoleById(tabRole, pids);
-        if (result) {
-            return Response.success().message("修改成功");
+    public Response updateRole(TabRole tabRole,String[] pids){
+        Response response = validateRoleExit(tabRole.getName(),tabRole.getCode(),tabRole.getId());
+        //验证成功则进行添加
+        if (response.getCode().equals("0")) {
+            log.info("权限id:" + pids);
+            boolean result = roleService.updateRoleById(tabRole, pids);
+            if (result) {
+                return Response.success().message("修改成功");
+            }
+            return Response.failure("修改失败");
         }
-        return Response.failure("修改失败");
+        return response;
     }
 
     @ApiOperation(value = "删除角色", notes = "删除角色")
-    @ApiImplicitParam(name = "roleIds", value = "角色id数组，批量删除", required = true, dataType ="String[]")
+    @ApiImplicitParam(name = "roleIds", value = "角色id数组，批量删除", paramType = "query",allowMultiple = true,required = true, dataType ="String[]")
     @DeleteMapping("/deleteRole")
     public Response deleteRole(String[] roleIds) {
         for (String roleId : roleIds) {

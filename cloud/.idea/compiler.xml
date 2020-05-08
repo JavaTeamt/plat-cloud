@@ -7,11 +7,12 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="server-oauth2-router" />
-        <module name="server-zipkin" />
         <module name="eureka-server" />
-        <module name="server-oauth2" />
-        <module name="server-sys" />
+        <module name="server-zipkin" />
         <module name="common" />
+        <module name="server-oauth2" />
+        <module name="server-web" />
+        <module name="server-sys" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -20,7 +21,6 @@
       <module name="server-cas" target="1.8" />
       <module name="server-router" target="1.8" />
       <module name="server-user" target="1.8" />
-      <module name="server-web" target="1.8" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">

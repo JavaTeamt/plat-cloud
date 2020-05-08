@@ -1,8 +1,11 @@
 package com.czkj.permission.dao;
 
 import com.czkj.common.entity.TabPermission;
+import com.czkj.common.entity.TabPermissionUrl;
 import com.czkj.common.entity.TabRolePermission;
+import com.czkj.common.entity.TabSubscriber;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -12,61 +15,96 @@ import java.util.List;
  * @Modified By：
  */
 public interface MenuDao {
+
+
     /**
-     * 根据父菜单，查询子菜单
-     * @param parentId 父菜单ID
+     * 查询所有权限信息
+     * @param available 可用标识
+     * @return
+     */
+    List<TabPermission> queryAllList(String available);
+
+
+    /**
+     * 根据资源id查询对应URL信息
+     * @param perId 权限id
+     * @return
+     */
+    List<TabPermissionUrl> queryAllUrlList(String perId);
+
+    /**
+     * 新增权限数据及选择对应URL
+     * @param name 权限名
+     */
+    String savePermission(String name);
+
+    /**
+     * 新增权限URL
+     * @param url url
+     * @param perId 权限id
+     */
+    void savePerUrl(String url, String perId, Date lastUpdateTime);
+
+    /**
+     * 根据主键获取权限信息
+     * @param key 主键
+     */
+    TabPermission queryPermission(String key);
+
+    /**
+     * 根据权限id获取对应url
+     * @param perId 权限id
+     * @return
+     */
+    List<TabPermissionUrl> queryPerUrlList(String perId);
+
+    /**
+     * 修改权限数据
+     * @param name 权限名
+     * @param key 权限主键
+     */
+    void updatePermission(String name,String key);
+
+    /**
+     * 删除指定权限id的URL
+     * @param perId 权限id
+     */
+    void deletePerUrlByPerId(String perId);
+
+    /**
+     * 查询权限对应权限名是否存在
+     * @param name 权限名
+     * @param keyId 主键id-用于修改校验的标识
+     * @return
+     */
+    TabPermission queryPerByName(String name,String keyId);
+
+    /**
+     * 查询用户输入的url是否存在
+     * @param url url
+     * @return
+     */
+    TabPermissionUrl queryPerUrlByUrl(String url);
+
+
+    /**
+     * 修改权限可用状态
+     * @param id 权限id
      * @param available 是否可用
      */
-    List<TabPermission> queryMenuByParentId(String parentId, String available);
-
-//    /**
-//     * 查询所有资源信息
-//     * @return
-//     */
-//    List<TabPermission> queryList();
+    void updatePermissionForAvlia(String available, String id);
 
     /**
-     * 添加资源
-     * @param tabPermission
-     * @return
+     * 修改权限URL可用状态
+     * @param perId 权限id
+     * @param available 是否可用
      */
-    void addPermission(TabPermission tabPermission);
+    void updatePerUrlAvailable(String available, String perId);
 
     /**
-     * 根据对应id查询资源信息
-     * @param id 资源id
-     * @return
-     */
-    TabPermission selectTabPermissionById(String id);
-
-    /**
-     * 查询所有菜单（不包含view和button）
-     * @param parentId 父级id
-     * @return
-     */
-    List<TabPermission> queryAllMenuNotButton(String parentId);
-
-    /**
-     * 修改资源列表
-     * @param tabPermission 实体接收参数
-     * @return
-     */
-    void updateTabPermission(TabPermission tabPermission);
-
-    /**
-     * 查询资源及对应角色信息
+     * 查询权限及对应角色信息
      * @param pid 资源id
      * @return
      */
-    TabRolePermission selectPermissionAndRole(String pid);
-
-    /**
-     * 废弃资源
-     * @param id 资源id
-     * @param available 是否可用
-     * @param parentId 父级id
-     */
-    void updatePermissionForAvlia(String available, String id, String parentId);
-
-
+    TabPermission queryPermissionAndRole(String pid);
 }

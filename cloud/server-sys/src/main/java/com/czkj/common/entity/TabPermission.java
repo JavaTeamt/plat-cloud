@@ -4,50 +4,30 @@ import io.swagger.annotations.ApiModelProperty;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class TabPermission implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @ApiModelProperty(value="主键id",name="id")
+    @ApiModelProperty(value="主键id",name="id",hidden = true)
     private String id;
 
     @ApiModelProperty(value="资源名称",name="name")
     private String name;
 
-    @ApiModelProperty(value="资源类型(menu,button,auth)",name="type")
-    private String type;
-
-    @ApiModelProperty(value="访问url地址",name="url")
-    private String url;
-
-    @ApiModelProperty(value="权限代码字符串/menu=>vue name",name="perCode")
-    private String perCode;
-
-    @ApiModelProperty(value="样式",name="clazz")
-    private String clazz;
-
-    @ApiModelProperty(value="父结点id",name="parentId")
-    private String parentId;
-
-    @ApiModelProperty(value="父结点名称",name="parentName")
-    private String parentName;
-
-    @ApiModelProperty(value="排序号",name="sortString")
-    private String sortString;
-
-    @ApiModelProperty(value="是否可用,1：可用，0不可用",name="available")
+    @ApiModelProperty(name = "available",value = "可用标识：0-不可用，1-可用",hidden = true)
     private String available;
 
-    @ApiModelProperty(value="创建时间",name="createTime")
-    private String createTime;
+    @ApiModelProperty(name = "createTime",value = "创建日期",hidden = true)
+    private Date createTime;
 
-    @ApiModelProperty(value="最后修改时间",name="lastUpdateTime")
-    private String lastUpdateTime;
+    @ApiModelProperty(name = "createTime",value = "最后修改日期",hidden = true)
+    private Date lastUpdateTime;
 
-    @ApiModelProperty(value="菜单信息树",hidden=true)
-    private List<TabPermission> childMenu =new ArrayList();
+    @ApiModelProperty(value = "url集合，一个权限对应多条url",name = "urlList",hidden = true)
+    private List<TabPermissionUrl> urlList=new ArrayList<>();
 
     public String getId() {
         return id;
@@ -65,52 +45,12 @@ public class TabPermission implements Serializable {
         this.name = name;
     }
 
-    public String getType() {
-        return type;
+    public List<TabPermissionUrl> getUrlList() {
+        return urlList;
     }
 
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public String getPerCode() {
-        return perCode;
-    }
-
-    public void setPerCode(String perCode) {
-        this.perCode = perCode;
-    }
-
-    public String getClazz() {
-        return clazz;
-    }
-
-    public void setClazz(String clazz) {
-        this.clazz = clazz;
-    }
-
-    public String getParentId() {
-        return parentId;
-    }
-
-    public void setParentId(String parentId) {
-        this.parentId = parentId;
-    }
-
-    public String getSortString() {
-        return sortString;
-    }
-
-    public void setSortString(String sortString) {
-        this.sortString = sortString;
+    public void setUrlList(List<TabPermissionUrl> urlList) {
+        this.urlList = urlList;
     }
 
     public String getAvailable() {
@@ -121,54 +61,31 @@ public class TabPermission implements Serializable {
         this.available = available;
     }
 
-    public String getCreateTime() {
+    public Date getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(String createTime) {
+    public void setCreateTime(Date createTime) {
         this.createTime = createTime;
     }
 
-    public String getLastUpdateTime() {
+    public Date getLastUpdateTime() {
         return lastUpdateTime;
     }
 
-    public void setLastUpdateTime(String lastUpdateTime) {
+    public void setLastUpdateTime(Date lastUpdateTime) {
         this.lastUpdateTime = lastUpdateTime;
-    }
-
-    public List<TabPermission> getChildMenu() {
-        return childMenu;
-    }
-
-    public void setChildMenu(List<TabPermission> childMenu) {
-        this.childMenu = childMenu;
-    }
-
-    public String getParentName() {
-        return parentName;
-    }
-
-    public void setParentName(String parentName) {
-        this.parentName = parentName;
     }
 
     @Override
     public String toString() {
         return "TabPermission{" +
-                "id=" + id +
+                "id='" + id + '\'' +
                 ", name='" + name + '\'' +
-                ", type='" + type + '\'' +
-                ", url='" + url + '\'' +
-                ", perCode='" + perCode + '\'' +
-                ", clazz='" + clazz + '\'' +
-                ", parentId=" + parentId +
-                ", parentName='" + parentName + '\'' +
-                ", sortString='" + sortString + '\'' +
                 ", available='" + available + '\'' +
-                ", createTime='" + createTime + '\'' +
-                ", lastUpdateTime='" + lastUpdateTime + '\'' +
-                ", childMenu=" + childMenu +
+                ", createTime=" + createTime +
+                ", lastUpdateTime=" + lastUpdateTime +
+                ", urlList=" + urlList +
                 '}';
     }
 }

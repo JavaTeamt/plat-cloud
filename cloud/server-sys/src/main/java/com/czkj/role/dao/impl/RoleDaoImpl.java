@@ -1,8 +1,10 @@
 package com.czkj.role.dao.impl;
 
 import com.czkj.common.entity.TabPermission;
+import com.czkj.common.entity.TabPermissionUrl;
 import com.czkj.common.entity.TabRole;
 import com.czkj.common.entity.TabRolePermission;
+import com.czkj.permission.dao.MenuDao;
 import com.czkj.role.dao.RoleDao;
 import com.czkj.utils.PageResult;
 import org.apache.commons.lang.StringUtils;
@@ -15,11 +17,9 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 
@@ -33,6 +33,9 @@ import java.util.List;
 public class RoleDaoImpl implements RoleDao {
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private MenuDao menuDao;
 
     @Override
     public PageResult<TabRole> queryRoleList(int page, int size, String roleName, String available) {
@@ -87,13 +90,20 @@ public class RoleDaoImpl implements RoleDao {
      * @return
      */
     private List<TabPermission> getPermissionListByRole(String rid) {
-        String permissionSql = "select p.id,p.name,p.type,p.url from tab_permission p RIGHT JOIN  tab_role_permission rp on p.id=rp.sys_permission_id left JOIN  tab_role r on r.id=rp.sys_role_id where r.id=?";
+        String permissionSql = "select p.id,p.name from tab_permission p RIGHT JOIN  tab_role_permission rp on p.id=rp.sys_permission_id left JOIN  tab_role r on r.id=rp.sys_role_id where r.id=?";
         List<TabPermission> permissions = jdbcTemplate.query(permissionSql, new BeanPropertyRowMapper<>(TabPermission.class), rid);
+        if (permissions.size()>0){
+            for (int i = 0;i<permissions.size();i++){
+                List<TabPermissionUrl> permissionUrls = menuDao.queryPerUrlList(permissions.get(i).getId());
+                permissions.get(i).setUrlList(permissionUrls);
+            }
+        }
         return permissions;
     }
 
     @Override
-    public String addRole(TabRole tabRole) {
+    public String addRole(String name, String code) {
+        Timestamp timestamp = new Timestamp(new Date().getTime());
         //通过jdbctemplate返回主键
         KeyHolder keyHolder = new GeneratedKeyHolder();
         String sql = "insert into tab_role(code,name,available,create_time) values(?,?,?,?)";
@@ -101,10 +111,10 @@ public class RoleDaoImpl implements RoleDao {
             @Override
             public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
                 PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-                ps.setString(1, new String(tabRole.getCode()).toUpperCase());
-                ps.setString(2, new String(tabRole.getName()).toUpperCase());
-                ps.setString(3, tabRole.getAvailable());
-                ps.setString(4, tabRole.getCreateTime());
+                ps.setString(1, new String(code).toUpperCase());
+                ps.setString(2, new String(name).toUpperCase());
+                ps.setString(3, "1");
+                ps.setTimestamp(4,timestamp);
                 return ps;
             }
         }, keyHolder);
@@ -116,15 +126,15 @@ public class RoleDaoImpl implements RoleDao {
     @Override
     public void addRoleAndPermission(TabRolePermission tabRolePermission) {
         String sql = "insert into tab_role_permission(sys_role_id,sys_permission_id,create_time,last_update_time) values(?,?,?,?)";
-         jdbcTemplate.update(sql, tabRolePermission.getSysRoleId(),
+        jdbcTemplate.update(sql, tabRolePermission.getSysRoleId(),
                 tabRolePermission.getSysPermissionId(),
-                tabRolePermission.getCreateTime(),
+                new Date(),
                 tabRolePermission.getLastUpdateTime());
     }
 
     @Override
     public TabRole queryRoleById(String roleId) {
-        TabRole tabRole = selectKeyOfValue("id", roleId);
+        TabRole tabRole = selectKeyOfValue("id", roleId,null);
         if (tabRole != null) {
             //获取对应角色
             List<TabPermission> permissionListByRole = getPermissionListByRole(tabRole.getId());
@@ -141,21 +151,10 @@ public class RoleDaoImpl implements RoleDao {
         String sql = "update tab_role set code=?,name=?,last_update_time=? where id=?";
         jdbcTemplate.update(sql, tabRole.getCode(),
                 tabRole.getName(),
-                tabRole.getLastUpdateTime(),
+                new Date(),
                 tabRole.getId());
     }
 
-    @Override
-    public TabRolePermission queryRoleAndPerForRow(String roleId, String perId) {
-        String sql = "select create_time from tab_role_permission where 1=1 and sys_role_id=? and sys_permission_id=?";
-        SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(sql, roleId, perId);
-        while (sqlRowSet.next()) {
-            TabRolePermission tabRolePermission = new TabRolePermission();
-            tabRolePermission.setCreateTime(sqlRowSet.getString("create_time"));
-            return tabRolePermission;
-        }
-        return null;
-    }
 
     @Override
     public List<TabRolePermission> queryRoleOrPerForList(String roleId, String perId) {
@@ -179,20 +178,26 @@ public class RoleDaoImpl implements RoleDao {
     }
 
     @Override
-    public void updateRoleAvailable(String available, String roleId) {
-        jdbcTemplate.update("update tab_role set available=? where id=?", available, roleId);
+    public void updateRoleAvailable(String roleId) {
+        jdbcTemplate.update("update tab_role set available=? where id=?", roleId);
     }
 
     @Override
-    public TabRole selectKeyOfValue(String key, String value) {
-        String sql = "select id,code,name,create_time from tab_role where " + key + "=?";
-        SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(sql, value);
+    public TabRole selectKeyOfValue(String key, String value,String keyid) {
+        SqlRowSet sqlRowSet = null;
+        if (StringUtils.isNotBlank(keyid)){
+            String sql = "select id,code,name,create_time from tab_role where " + key + "=? and id<>?";
+            sqlRowSet = jdbcTemplate.queryForRowSet(sql, value,keyid);
+        }else {
+            String sql = "select id,code,name,create_time from tab_role where " + key + "=?";
+            sqlRowSet = jdbcTemplate.queryForRowSet(sql, value);
+        }
         while (sqlRowSet.next()) {
             TabRole tabRole = new TabRole();
             tabRole.setId(sqlRowSet.getString("id"));
             tabRole.setCode(sqlRowSet.getString("code"));
             tabRole.setName(sqlRowSet.getString("name"));
-            tabRole.setCreateTime(sqlRowSet.getString("create_time"));
+            tabRole.setCreateTime(sqlRowSet.getDate("create_time"));
             return tabRole;
         }
         return null;

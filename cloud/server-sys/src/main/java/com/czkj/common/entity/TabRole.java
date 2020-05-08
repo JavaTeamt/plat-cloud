@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class TabRole implements Serializable {
@@ -19,32 +20,32 @@ public class TabRole implements Serializable {
     /**
      * 角色编码
      */
-    @ApiModelProperty(value="角色编码",name="code")
+    @ApiModelProperty(value="角色编码",name="code",required = true)
     private String code;
 
     /**
      * 角色名
      */
-    @ApiModelProperty(value="角色名",name="name")
+    @ApiModelProperty(value="角色名",name="name",required = true)
     private String name;
 
     /**
      * 是否可用
      */
-    @ApiModelProperty(value="是否可用",name="available")
+    @ApiModelProperty(value="是否可用",name="available",hidden = true)
     private String available;
 
     /**
      * 创建时间
      */
-    @ApiModelProperty(value="创建时间",name="createTime")
-    private String  createTime;
+    @ApiModelProperty(value="创建时间",name="createTime",hidden = true)
+    private Date createTime;
 
     /**
      * 最后修改时间
      */
-    @ApiModelProperty(value="最后修改时间",name="lastUpdateTime")
-    private String lastUpdateTime;
+    @ApiModelProperty(value="最后修改时间",name="lastUpdateTime",hidden = true)
+    private Date lastUpdateTime;
 
     @ApiModelProperty(value="资源",hidden=true)
     private List<TabPermission> tabPermissions = new ArrayList<>();
@@ -81,19 +82,19 @@ public class TabRole implements Serializable {
         this.available = available == null ? null : available.trim();
     }
 
-    public String getCreateTime() {
+    public Date getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(String createTime) {
+    public void setCreateTime(Date createTime) {
         this.createTime = createTime;
     }
 
-    public String getLastUpdateTime() {
+    public Date getLastUpdateTime() {
         return lastUpdateTime;
     }
 
-    public void setLastUpdateTime(String lastUpdateTime) {
+    public void setLastUpdateTime(Date lastUpdateTime) {
         this.lastUpdateTime = lastUpdateTime;
     }
 

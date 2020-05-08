@@ -1,6 +1,7 @@
 package com.czkj.common.entity;
 
 import java.io.Serializable;
+import java.util.Date;
 
 public class TabRolePermission implements Serializable {
     private String id;
@@ -9,9 +10,9 @@ public class TabRolePermission implements Serializable {
 
     private String sysPermissionId;
 
-    private String createTime;
+    private Date createTime;
 
-    private String lastUpdateTime;
+    private Date lastUpdateTime;
 
     public String getId() {
         return id;
@@ -37,19 +38,19 @@ public class TabRolePermission implements Serializable {
         this.sysPermissionId = sysPermissionId == null ? null : sysPermissionId.trim();
     }
 
-    public String getCreateTime() {
+    public Date getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(String createTime) {
+    public void setCreateTime(Date createTime) {
         this.createTime = createTime;
     }
 
-    public String getLastUpdateTime() {
+    public Date getLastUpdateTime() {
         return lastUpdateTime;
     }
 
-    public void setLastUpdateTime(String lastUpdateTime) {
+    public void setLastUpdateTime(Date lastUpdateTime) {
         this.lastUpdateTime = lastUpdateTime;
     }
 

@@ -1,6 +1,7 @@
 package com.czkj.user.controller;
 
 
+import com.czkj.common.entity.TabRole;
 import com.czkj.res.Response;
 
 import com.czkj.common.entity.TabCustomer;
@@ -35,6 +36,7 @@ import java.util.List;
 @RestController
 @RequestMapping("user")
 public class UserController {
+
     @Autowired
     private UserService userService;
 
@@ -43,11 +45,12 @@ public class UserController {
 
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
+    private String userName = "1973849951"/*Base.getUserName(request)*/;
+
     @ApiOperation(value = "用户注册", notes = "用户注册")
-    @ApiImplicitParam(name = "tabSubscriber", value = "用户实体，用于接收用户一些基本属性的值", required = true, dataType = "Object")
     @PostMapping("/userRegister")
     public Response UserRegister(TabSubscriber tabSubscriber /*, String smsCode*/) {
-        Response response = vUserExit(tabSubscriber.getId(), tabSubscriber.getMobile());
+        Response response = vUserExit(tabSubscriber.getId(), tabSubscriber.getMobile(),null);
         if ("0".equals(response.getCode())) {
             boolean result = userService.userRegister(tabSubscriber);
             if (result) {
@@ -65,31 +68,31 @@ public class UserController {
      * @param mobile 手机号
      * @return
      */
-    private Response vUserExit(String id, String mobile) {
+    private Response vUserExit(String id, String mobile,String keyId) {
         //先进行表单的一些校验，校验成功进行用户注册
-        boolean result = userService.vUserExits(id, mobile);
+
         if (StringUtils.isNotBlank(id)) {
+            boolean result = userService.vUserExits(id, null,keyId);
             if (result) {
                 //用户名已存在
-                return Response.failure("5003", "用户名已存在");
+                return Response.failure("5003", "用户名已注册");
             }
-            return Response.success().message("用户名通过");
         }
         if (StringUtils.isNotBlank(mobile)) {
+            boolean result = userService.vUserExits(null, mobile,keyId);
             if (result) {
                 //电话已存在
-                return Response.failure("5004", "电话已存在");
+                return Response.failure("5004", "电话已注册");
             }
-            return Response.success().message("电话通过");
         }
-        return Response.failure("5013", "不能为空");
+        return Response.success();
     }
 
     @ApiOperation(value = "显示用户注册时的手机号", notes = "显示用户注册时的手机号")
     @GetMapping("/vPhoneExit")
     public Response vPhoneExit() {
         //获取登录账号
-        String userName = Base.getUserName(request);
+//        String userName = Base.getUserName(request);
         String mobile = userService.vPhoneExits(userName);
         if (StringUtils.isNotBlank(mobile)) {
             return Response.success(mobile);
@@ -98,11 +101,11 @@ public class UserController {
     }
 
     @ApiOperation(value = "修改用户手机号", notes = "修改用户手机号")
-    @ApiImplicitParam(name = "phone", value = "新手机号", required = true, dataType = "String")
+    @ApiImplicitParam(name = "phone", value = "新手机号", paramType = "query", required = true, dataType = "String")
     @PutMapping("/updatePhone")
     public Response updatePhone(String phone) {
         //获取登录账号
-        String userName = Base.getUserName(request);
+//        String userName = Base.getUserName(request);
         boolean b = userService.updateUserPhone(phone, userName);
         if (b) {
             return Response.success().message("手机号修改成功");
@@ -111,11 +114,12 @@ public class UserController {
     }
 
     @ApiOperation(value = "修改用户密码", notes = "修改用户密码")
-    @ApiImplicitParam(name = "password", value = "要修改的密码", required = true, dataType = "String")
+    @ApiImplicitParam(name = "password", value = "要修改的密码", paramType = "query", required = true, dataType = "String")
     @PutMapping("/forgetPassword")
     public Response forgetPassword(String password) {
         //获取当前用户登录账号
-        String userName = Base.getUserName(request);
+//        String userName = Base.getUserName(request);
+        log.info("修改密码为：" + password);
         boolean result = userService.forgetPassoword(password, userName);
         if (result) {
             return Response.success().message("密码修改成功");
@@ -142,7 +146,7 @@ public class UserController {
     @GetMapping("/getUserById")
     public Response getUserById() {
         //获取当前用户登录账号
-        String userName = Base.getUserName(request);
+//        String userName = Base.getUserName(request);
         log.info("用户名:" + userName);
         TabSubscriber user = userService.getUserById(userName);
         log.info("用户数据:" + user);
@@ -150,10 +154,9 @@ public class UserController {
     }
 
     @ApiOperation(value = "身份认证", notes = "身份认证")
-    @ApiImplicitParam(name = "tabCustomer", value = "实体类接收参数", required = true, dataType = "Object")
     @PostMapping("/authentication")
     public Response Authentication(TabCustomer tabCustomer) {
-        String userName = Base.getUserName(request);
+//        String userName = Base.getUserName(request);
         String custid = userService.getUserById(userName).getCustid();
         //判断未实名状态下才可实名
         if (StringUtils.isBlank(custid)) {
@@ -167,74 +170,77 @@ public class UserController {
     }
 
     @ApiOperation(value = "显示用户列表（分页）", notes = "显示用户列表（分页）")
-    @ApiImplicitParams({@ApiImplicitParam(name = "currentPage", value = "当前页", required = true, dataType = "int"),
-            @ApiImplicitParam(name = "size", value = "每页显示条数", required = true, dataType = "int")})
+    @ApiImplicitParams({@ApiImplicitParam(name = "currentPage", value = "当前页", paramType = "query", required = true, dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页显示条数", paramType = "query", required = true, dataType = "int")})
     @GetMapping("/showUserList")
     public PageResult showUserList(int currentPage, int size) {
-        return userService.getUserList(currentPage, size);
+        if (currentPage > 0 && size > 0) {
+            return userService.getUserList(currentPage, size);
+        }
+        return null;
     }
 
     @ApiOperation(value = "显示身份信息,判断是否实名，实名显示身份信息，未实名则提供实名操作", notes = "显示身份信息,判断是否实名，实名显示身份信息，未实名则提供实名操作")
     @GetMapping("/showCert")
     public Response showCert() {
-        String userName = "1964160321"/*Base.getUserName(request)*/;
+//        String userName = Base.getUserName(request);
         TabCustomer customerByUid = userService.getCustomerByUid(userName);
         return Response.success(customerByUid);
 
     }
 
-    @ApiOperation(value = "显示对应用户及客户相关信息,用于编辑用户前显示", notes = "显示对应用户及客户相关信息,用于编辑用户前显示")
+    @ApiOperation(value = "显示对应用户相关信息,用于编辑用户前显示", notes = "显示对应用户相关信息,用于编辑用户前显示")
+    @ApiImplicitParam(name = "id", value = "登录账号", required = true, paramType = "query", dataType = "String")
     @GetMapping("/showUserAndRoleById")
-    public Response showUserAndRoleById() {
-        String userName = Base.getUserName(request);
+    public Response showUserAndRoleById(@RequestParam("id") String userName) {
         TabSubscriber tabSubscriber = userService.getAllUserByUid(userName);
         return Response.success(tabSubscriber);
     }
 
-    @ApiOperation(value = "显示用户列表", notes = "显示用户客户基本信息")
-    @ApiImplicitParams({@ApiImplicitParam(name = "tabSubscriber", value = "用户实体，用于接收用户一些基本属性的值", required = true, dataType = "Object"),
-            @ApiImplicitParam(name = "roleIds", value = "角色id，可接收多个角色", required = true, dataType = "String[]")
-    })
+    @ApiOperation(value = "修改用户数据", notes = "修改用户数据")
+    @ApiImplicitParam(name = "roleIds", value = "角色id，可接收多个角色", required = false, allowMultiple = true, paramType = "query", dataType = "String")
     @PutMapping("/updateUserAndRole")
     public Response updateUserAndRole(TabSubscriber tabSubscriber, String[] roleIds) {
-        boolean result = userService.updateUserAndRole(tabSubscriber, roleIds);
-        if (result) {
-            return Response.success().message("修改成功");
+        log.info("用户数据==" + tabSubscriber + ",角色id=" + roleIds.toString());
+        Response response = vUserExit(null, tabSubscriber.getMobile(),tabSubscriber.getId());
+        if (response.getCode().equals("0")) {
+            boolean result = userService.updateUserAndRole(tabSubscriber, roleIds);
+            if (result) {
+                return Response.success().message("修改成功");
+            }
+            return Response.failure().message("修改失败");
         }
-        return Response.failure().message("修改失败");
+        return response;
     }
 
-    @ApiOperation(value = "显示用户列表", notes = "显示用户客户基本信息")
-    @ApiImplicitParam(name = "roleIds", value = "角色id，可接收多个角色", required = false, dataType = "String[]")
+    @ApiOperation(value = "新增用户数据", notes = "新增用户数据")
+    @ApiImplicitParam(name = "roleIds", value = "角色id，可接收多个角色", paramType = "query", allowMultiple = true, required = false, dataType = "String")
     @PostMapping("/addUserAndRole")
     public Response addUserAndRole(TabSubscriber tabSubscriber, String[] roleIds) {
-        boolean result = userService.vUserExits(tabSubscriber.getId(), tabSubscriber.getMobile());
-        if (!result) {
+        Response response = vUserExit(tabSubscriber.getId(), tabSubscriber.getMobile(),null);
+        if (response.getCode().equals("0")) {
             boolean b = userService.addUserAndRole(tabSubscriber, roleIds);
             if (b) {
                 return Response.success().message("新增成功");
             }
+            return Response.failure("新增失败");
         }
-        return Response.failure("新增失败");
+        return response;
     }
 
     @ApiOperation(value = "删除用户", notes = "删除用户")
-    @ApiImplicitParam(name = "ids", value = "用户id数组", required = true, dataType = "String[]")
+    @ApiImplicitParam(name = "userid", value = "用户id", paramType = "query", required = true, dataType = "String")
     @DeleteMapping("/deleteUserAndRole")
-    public Response deleteUserAndRole(String[] ids) {
-        log.info("用户id数组：" + ids);
-        if (ids != null && ids.length > 0) {
-            for (String id : ids) {
-                //查询用户是否绑定角色
-                List<TabUserRole> tabUserRoles = userService.queryListByUserId(id);
-                if (tabUserRoles.size() <= 0) {
-                    boolean b = userService.deleteUserAndRole(id);
-                    if (b) {
-                        return Response.success().message("删除成功");
-                    }
-                } else {
-                    return Response.failure("4018", "抱歉不能删除用户" + id + "，有角色绑定,没有角色绑定用户已为您删除");
-                }
+    public Response deleteUser(String userid) {
+        log.info("用户id：" + userid);
+        //查询用户是否绑定角色
+        List<TabRole> roleListByUId = userService.getRoleListByUId(userid);
+        if (roleListByUId.size() > 0) {
+            return Response.failure("4018", "抱歉不能删除用户,有角色绑定");
+        } else {
+            boolean b = userService.deleteUser(userid);
+            if (b) {
+                return Response.success().message("删除成功");
             }
         }
         return Response.failure("删除失败");

@@ -25,14 +25,14 @@ public class PageResult<T>{
     private int totalCount;
 
     /**
-     * 当前页显示数据
-     */
-    private List<T> items;
-
-    /**
      * 总页面
      */
     private int totalPage;
+
+    /**
+     * 当前页显示数据
+     */
+    private List<T> items;
 
     public PageResult() {
     }

@@ -5,12 +5,8 @@ import com.czkj.common.entity.TabCustomer;
 import com.czkj.common.entity.TabRole;
 import com.czkj.common.entity.TabSubscriber;
 import com.czkj.common.entity.TabUserRole;
-import com.czkj.common.entity.vo.CustomerAndUser;
 import com.czkj.utils.PageResult;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.text.ParseException;
 import java.util.List;
 
 
@@ -30,9 +26,10 @@ public interface UserService {
      * 校验账号，手机号是否存在
      * @param id 登录账号
      * @param moblie 手机号
+     * @param keyId 主键id-用于修改校验标识
      * @return
      */
-    boolean vUserExits(String id, String moblie);
+    boolean vUserExits(String id, String moblie,String keyId);
 
     /**
      * 验证对应用户是否绑定手机号
@@ -127,15 +124,9 @@ public interface UserService {
 
     /**
      * 删除用户
-     * @param userid 登录账号,批量删除
+     * @param userid 登录账号
      * @return
      */
-    boolean deleteUserAndRole(String userid);
+    boolean deleteUser(String userid);
 
-    /**
-     * 根据用户id查询用户角色关系表记录
-     * @param userId 用户id
-     * @return
-     */
-    List<TabUserRole> queryListByUserId(String userId);
 }

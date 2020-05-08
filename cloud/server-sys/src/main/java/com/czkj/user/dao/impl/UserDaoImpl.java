@@ -17,10 +17,8 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,7 +35,6 @@ public class UserDaoImpl<T> implements UserDao<T> {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-
     @Override
     public void addUserJ(TabSubscriber user) {
         //定义sql
@@ -45,16 +42,24 @@ public class UserDaoImpl<T> implements UserDao<T> {
         jdbcTemplate.update(sql, user.getId(),
                 user.getMobile(),
                 user.getPassword(),
-                user.getLoginStatus(),
+                "0",
                 user.getHeadImg(),
-                user.getCreateTime());
+                new Date());
     }
 
     @Override
-    public TabSubscriber selectUserByKey(String key, String value) {
-        //定义sql
-        String sql = "select id,mobile,password,headimg,loginstatus from tab_subscriber where " + key + "=?";
-        SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(sql, value);
+    public TabSubscriber selectUserByKey(String key, String value,String keyId) {
+        SqlRowSet sqlRowSet = null;
+        if (StringUtils.isNotBlank(keyId)){
+            //定义sql
+            String sql = "select id,mobile,password,headimg,loginstatus from tab_subscriber where " + key + "=? and id=?";
+            sqlRowSet = jdbcTemplate.queryForRowSet(sql, value,keyId);
+        }else {
+            //定义sql
+            String sql = "select id,mobile,password,headimg,loginstatus from tab_subscriber where " + key + "=?";
+            sqlRowSet = jdbcTemplate.queryForRowSet(sql, value);
+        }
+
         if (sqlRowSet.next()) {
             //创建用户对象
             TabSubscriber tabSubscriber = new TabSubscriber();
@@ -70,18 +75,17 @@ public class UserDaoImpl<T> implements UserDao<T> {
     }
 
     @Override
-    public int updateUserJ(String id, String mobile, String headImg) {
+    public void updateUserJ(String id, String mobile, String headImg) {
         int result = 0;
         //定义sql
         String sql = "update tab_subscriber set ";
         if (StringUtils.isNotBlank(mobile)) {
             sql += "mobile=? where id = ?";
-           result =  jdbcTemplate.update(sql, mobile, id);
+            jdbcTemplate.update(sql, mobile, id);
         } else if (StringUtils.isNotBlank(headImg)) {
             sql += "headimg=? where id=?";
-            result = jdbcTemplate.update(sql, headImg, id);
+            jdbcTemplate.update(sql, headImg, id);
         }
-        return result;
     }
 
     @Override
@@ -100,6 +104,7 @@ public class UserDaoImpl<T> implements UserDao<T> {
 
     @Override
     public String addCustomer(TabCustomer tabCustomer) {
+        Timestamp timestamp = new Timestamp(new Date().getTime());
         //通过jdbctemplate返回主键
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(new PreparedStatementCreator() {
@@ -111,9 +116,9 @@ public class UserDaoImpl<T> implements UserDao<T> {
                 ps.setString(2, tabCustomer.getSex());
                 ps.setString(3, tabCustomer.getCertType());
                 ps.setString(4, tabCustomer.getCertid());
-                ps.setString(5, tabCustomer.getCustidentify());
+                ps.setString(5, "1");
                 ps.setString(6, tabCustomer.getMobile());
-                ps.setString(7, tabCustomer.getCreatetime());
+                ps.setTimestamp(7, timestamp);
                 return ps;
             }
         }, keyHolder);
@@ -189,7 +194,7 @@ public class UserDaoImpl<T> implements UserDao<T> {
 
     @Override
     public TabSubscriber selectAllUserByUid(String id) {
-        TabSubscriber tabSubscriber = selectUserByKey("id", id);
+        TabSubscriber tabSubscriber = selectUserByKey("id", id,null);
         if (tabSubscriber != null) {
 //            //获取对应客户数据
 //            TabCustomer tabCustomer = selectCustomerByUid(tabSubscriber.getId());
@@ -209,7 +214,7 @@ public class UserDaoImpl<T> implements UserDao<T> {
         String sql = "insert into tab_user_role(sys_user_id,sys_role_id,create_time,last_update_time) values(?,?,?,?)";
         jdbcTemplate.update(sql, tabUserRole.getSysUserId(),
                 tabUserRole.getSysRoleId(),
-                tabUserRole.getCreateTime(),
+                new Date(),
                 tabUserRole.getLastUpdateTime());
     }
 
@@ -236,27 +241,5 @@ public class UserDaoImpl<T> implements UserDao<T> {
         jdbcTemplate.update(sql, keyId);
     }
 
-    @Override
-    public List<TabUserRole> queryListByUserId(String userId) {
-        String sql = "select * from tab_user_role where sys_user_id = ?";
-        List<TabUserRole> tabUserRoles = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabUserRole.class), userId);
-        return tabUserRoles;
-    }
-
-    @Override
-    public TabUserRole queryRow(String userId, String roleId) {
-        String sql = "select * from tab_user_role where sys_user_id=? and sys_role_id=?";
-        SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(sql, userId, roleId);
-        while (sqlRowSet.next()) {
-            TabUserRole tabUserRole = new TabUserRole();
-            tabUserRole.setId(sqlRowSet.getString("id"));
-            tabUserRole.setSysUserId(sqlRowSet.getString("sys_user_id"));
-            tabUserRole.setSysRoleId(sqlRowSet.getString("sys_role_id"));
-            tabUserRole.setCreateTime(sqlRowSet.getString("create_time"));
-            tabUserRole.setLastUpdateTime(sqlRowSet.getString("last_update_time"));
-            return tabUserRole;
-        }
-        return null;
-    }
 
 }

@@ -1,16 +1,22 @@
 package com.czkj.permission.dao.impl;
 
 import com.czkj.common.entity.TabPermission;
+import com.czkj.common.entity.TabPermissionUrl;
 import com.czkj.common.entity.TabRolePermission;
+import com.czkj.common.entity.TabSubscriber;
 import com.czkj.permission.dao.MenuDao;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.*;
+import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,142 +33,147 @@ public class MenuDaoImpl implements MenuDao {
     private JdbcTemplate jdbcTemplate;
 
     @Override
-    public List<TabPermission> queryMenuByParentId(String parentId, String available) {
-        String sql = "select id,name,type,url,per_code,clazz,available,sort_string from tab_permission where parent_id ="+parentId+" ";
-        //获取上级名称
-        String sqlForParentName = "select name from tab_permission where id = ? ";
-        List<TabPermission> tabPermissionList = new ArrayList<>();
+    public List<TabPermission> queryAllList(String available) {
+        List<TabPermission> permissionList = new ArrayList<>();
+        String sql = "select id,name from tab_permission where 1=1 ";
+
         if (StringUtils.isNotBlank(available)) {
-            sql += "and available=? ";
-            tabPermissionList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabPermission.class), available);
+            sql += "available = ?";
+            permissionList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabPermission.class), available);
+        } else {
+            permissionList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabPermission.class));
         }
-        tabPermissionList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabPermission.class));
-        //获取上级名称
-        if (!parentId.equals("0")) {
-        if (tabPermissionList.size() > 0) {
-            for (int i = 0; i < tabPermissionList.size(); i++) {
-                    SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(sqlForParentName, parentId);
-                    while (sqlRowSet.next()) {
-                        tabPermissionList.get(i).setParentName(sqlRowSet.getString("name"));
-                    }
-                }
+        //遍历过去URL信息
+        if (permissionList.size() > 0) {
+            for (int i = 0; i < permissionList.size(); i++) {
+                //根据权限id获取对应URL
+                List<TabPermissionUrl> tabPermissionUrls = queryAllUrlList(permissionList.get(i).getId());
+                permissionList.get(i).setUrlList(tabPermissionUrls);
             }
         }
-        return tabPermissionList;
-    }
 
-//    @Override
-//    public List<TabPermission> queryList() {
-//        String sql = "select * from tab_permission";
-//
-//        List<TabPermission> tabPermissionList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabPermission.class));
-//
-//        return tabPermissionList;
-//    }
-
-    @Override
-    public void addPermission(TabPermission tabPermission) {
-        String sql = "insert into tab_permission(name," +
-                "type," +
-                "url," +
-                "per_code," +
-                "clazz," +
-                "parent_id," +
-                "sort_string," +
-                "create_time) values(?,?,?,?,?,?,?,?) ";
-
-        jdbcTemplate.update(sql,
-                tabPermission.getName(),
-                tabPermission.getType(),
-                tabPermission.getUrl(),
-                tabPermission.getPerCode(),
-                tabPermission.getClazz(),
-                tabPermission.getParentId(),
-                tabPermission.getSortString(),
-                tabPermission.getCreateTime());
+        return permissionList;
     }
 
     @Override
-    public TabPermission selectTabPermissionById(String id) {
-        SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet("select id,name,type,url,per_code,clazz,parent_id,sort_string from tab_permission where id=?", id);
+    public List<TabPermissionUrl> queryAllUrlList(String perId) {
+        String sql = "select id,name from tab_permission_url where per_id =?";
+        List<TabPermissionUrl> urlList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabPermissionUrl.class), perId);
+        return urlList;
+    }
+
+    @Override
+    public String savePermission(String name) {
+        //获取当前时间
+        Timestamp timestamp = new Timestamp(new Date().getTime());
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        String sql = "insert into tab_permission(name,available,create_time) values(?,?,?)";
+        jdbcTemplate.update(sql, new PreparedStatementCreator() {
+            @Override
+            public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
+                PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+                ps.setString(1, name);
+                ps.setString(2, "1");
+                ps.setTimestamp(3, timestamp);
+                return ps;
+            }
+        }, keyHolder);
+        String key = keyHolder.getKey().toString();
+        return key;
+    }
+
+    @Override
+    public void savePerUrl(String url, String perId, Date lastUpdateTime) {
+        String sql = "insert into tab_permission_url(name,per_id,available,create_time,last_update_time) values(?,?,?,?,?)";
+        jdbcTemplate.update(sql, url, perId, "1", new Date(), lastUpdateTime);
+    }
+
+    @Override
+    public TabPermission queryPermission(String key) {
+        String sql = "select id,name from tab_permission where id=?";
+        SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(sql, key);
         while (sqlRowSet.next()) {
             TabPermission tabPermission = new TabPermission();
             tabPermission.setId(sqlRowSet.getString("id"));
             tabPermission.setName(sqlRowSet.getString("name"));
-            tabPermission.setType(sqlRowSet.getString("type"));
-            tabPermission.setUrl(sqlRowSet.getString("url"));
-            tabPermission.setPerCode(sqlRowSet.getString("per_code"));
-            tabPermission.setClazz(sqlRowSet.getString("clazz"));
-            tabPermission.setParentId(sqlRowSet.getString("parent_id"));
-            tabPermission.setSortString(sqlRowSet.getString("sort_string"));
+            List<TabPermissionUrl> permissionUrls = queryAllUrlList(tabPermission.getId());
+            if (permissionUrls.size() > 0) {
+                tabPermission.setUrlList(permissionUrls);
+            }
             return tabPermission;
         }
         return null;
     }
 
     @Override
-    public List<TabPermission> queryAllMenuNotButton(String parentId) {
-        String sql = "select name from tab_permission where type<>'1' and available='1' and parent_id="+parentId;
-        List<TabPermission> menuList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabPermission.class));
-        return menuList;
+    public List<TabPermissionUrl> queryPerUrlList(String perId) {
+        String sql = "select name from tab_permission_url where per_id=?";
+        List<TabPermissionUrl> permissionUrls = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabPermissionUrl.class), perId);
+        return permissionUrls;
     }
 
     @Override
-    public void updateTabPermission(TabPermission tabPermission) {
-        String sql = "";
-        //如果是菜单
-        if (tabPermission.getType().equals("1")) {
-            sql = "update tab_permission set name=?," +
-                    "type=?," +
-                    "url=?," +
-                    "per_code=?," +
-                    "clazz=?," +
-                    "parent_id=?," +
-                    "sort_string=?," +
-                    "last_update_time=? " +
-                    "where id=?";
-            jdbcTemplate.update(sql, tabPermission.getName(),
-                    tabPermission.getType(),
-                    tabPermission.getUrl(),
-                    tabPermission.getPerCode(),
-                    tabPermission.getClazz(),
-                    tabPermission.getParentId(),
-                    tabPermission.getSortString(),
-                    tabPermission.getLastUpdateTime(),
-                    tabPermission.getId());
-        } else if (tabPermission.getType().equals("2")) {
-            sql = "update tab_permission set name=?,type=?,per_code=?,parent_id=?,last_update_time=? where id=?";
-            jdbcTemplate.update(sql, tabPermission.getName(),
-                    tabPermission.getType(),
-                    tabPermission.getPerCode(),
-                    tabPermission.getParentId(),
-                    tabPermission.getLastUpdateTime(),
-                    tabPermission.getId());
+    public void updatePermission(String name, String key) {
+        String sql = "update tab_permission set name=?,last_update_time=? where id =?";
+        jdbcTemplate.update(sql, name, new Date(), key);
+    }
+
+    @Override
+    public void deletePerUrlByPerId(String perId) {
+        String sql = "delete from tab_permission_url where per_id=?";
+        jdbcTemplate.update(sql, perId);
+    }
+
+    @Override
+    public TabPermission queryPerByName(String name, String keyId) {
+        SqlRowSet sqlRowSet = null;
+        if (StringUtils.isNotBlank(keyId)) {
+            String sql = "select name from tab_permission where name=? and id<>?";
+            sqlRowSet = jdbcTemplate.queryForRowSet(sql, name, keyId);
+        } else {
+            String sql = "select name from tab_permission where name=?";
+            sqlRowSet = jdbcTemplate.queryForRowSet(sql, name);
         }
-
-    }
-
-    @Override
-    public TabRolePermission selectPermissionAndRole(String pid) {
-        String sql = "select sys_role_id from  tab_role_permission where sys_permission_id = ?";
-        SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(sql, pid);
         while (sqlRowSet.next()) {
-            TabRolePermission tabRolePermission = new TabRolePermission();
-            tabRolePermission.setSysRoleId(sqlRowSet.getString("sys_role_id"));
-            return tabRolePermission;
+            TabPermission tabPermission = new TabPermission();
+            tabPermission.setName(name);
         }
         return null;
     }
 
     @Override
-    public void updatePermissionForAvlia(String available, String id, String parentId) {
-        String sql = "update tab_permission set available=? where 1=1 ";
-        if (StringUtils.isNotBlank(id)) {
-            sql += "and id = ?";
-            jdbcTemplate.update(sql, available, id);
-        } else {
-            sql += "and parent_id=?";
-            jdbcTemplate.update(sql, available, parentId);
+    public TabPermissionUrl queryPerUrlByUrl(String url) {
+        String sql = "select name from tab_permission_url where name=?";
+        SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(sql, url);
+        while (sqlRowSet.next()) {
+            TabPermissionUrl tabPermissionUrl = new TabPermissionUrl();
+            tabPermissionUrl.setName(url);
         }
+        return null;
+    }
+
+    @Override
+    public void updatePermissionForAvlia(String available, String id) {
+        String sql = "update tab_permission set available=? where id=? ";
+        jdbcTemplate.update(sql, available, id);
+    }
+
+    @Override
+    public void updatePerUrlAvailable(String available, String perId) {
+        String sql = "update tab_permission_url set available=? where per_id=? ";
+        jdbcTemplate.update(sql, available, perId);
+    }
+
+    @Override
+    public TabPermission queryPermissionAndRole(String pid) {
+        String sql = "select p.name from tab_permission p RIGHT JOIN tab_role_permission rp on p.id=rp.sys_permission_id LEFT JOIN tab_role r on r.id=sys_role_id where p.id=?";
+        SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(sql, pid);
+        while (sqlRowSet.next()) {
+            TabPermission tabRolePermission = new TabPermission();
+            tabRolePermission.setName(sqlRowSet.getString("name"));
+            return tabRolePermission;
+        }
+        return null;
     }
 }

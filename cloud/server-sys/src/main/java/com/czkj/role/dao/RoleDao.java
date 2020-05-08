@@ -3,7 +3,6 @@ package com.czkj.role.dao;
 import com.czkj.common.entity.TabRole;
 import com.czkj.common.entity.TabRolePermission;
 import com.czkj.utils.PageResult;
-
 import java.util.List;
 
 /**
@@ -27,9 +26,10 @@ public interface RoleDao {
     /**
      * 添加角色信息
      *
-     * @param tabRole 实体类接收参数
+     * @param name 角色名
+     * @param code 角色编码
      */
-    String addRole(TabRole tabRole);
+    String addRole(String name, String code);
 
     /**
      * 添加角色及对应权限关系
@@ -53,16 +53,6 @@ public interface RoleDao {
      */
     void updateRoleById(TabRole tabRole);
 
-
-    /**
-     * 根据角色id和对应权限id获取关系表数据
-     *
-     * @param roleId 角色id
-     * @param perId  权限id
-     * @return
-     */
-    TabRolePermission queryRoleAndPerForRow(String roleId, String perId);
-
     /**
      * 根据角色id或者对应权限id获取关系表数据
      *
@@ -81,17 +71,17 @@ public interface RoleDao {
 
     /**
      * 修改指定角色可用标识
-     * @param available 可用标识
      * @param roleId 角色id
      */
-    void updateRoleAvailable(String available, String roleId);
+    void updateRoleAvailable(String roleId);
 
     /**
      * 根据指定字段和值查询数据
      * @param key 指定字段
      * @param value 值
+     * @param keyid 主键id，用于修改校验的字段
      * @return
      */
-    TabRole selectKeyOfValue(String key, String value);
+    TabRole selectKeyOfValue(String key, String value,String keyid);
 
 }

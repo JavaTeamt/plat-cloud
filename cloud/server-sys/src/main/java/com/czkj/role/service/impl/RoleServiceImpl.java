@@ -35,14 +35,14 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public boolean validateRoleExit(String roleName, String roleCode) {
+    public boolean validateRoleExit(String roleName, String roleCode,String keyid) {
         if (StringUtils.isNotBlank(roleName)) {
-            TabRole tabRole = roleDao.selectKeyOfValue("name", new String(roleName).toUpperCase());
+            TabRole tabRole = roleDao.selectKeyOfValue("name", new String(roleName).toUpperCase(),keyid);
             if (tabRole != null) {
                 return false;
             }
         } else if (StringUtils.isNotBlank(roleCode)) {
-            TabRole tabRole = roleDao.selectKeyOfValue("code", new String(roleCode).toUpperCase());
+            TabRole tabRole = roleDao.selectKeyOfValue("code", new String(roleCode).toUpperCase(),keyid);
             if (tabRole != null) {
                 return false;
             }
@@ -52,16 +52,12 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean saveRole(TabRole tabRole, String[] pids) {
-        //新增时，角色为可用
-        tabRole.setAvailable("1");
-        //设置创建时间
-        //日期转换-转换格式
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        tabRole.setCreateTime(df.format(new Date()));
+    public boolean saveRole(String name, String code, String[] pids) {
+
         try {
             //执行添加方法，返回主键id
-            String id = roleDao.addRole(tabRole);
+
+            String id = roleDao.addRole(name,code);
             //绑定权限-如果赋予的权限
             if (pids != null && pids.length > 0) {
                 savePermissionAndRole(id, pids);
@@ -82,9 +78,6 @@ public class RoleServiceImpl implements RoleService {
         for (String pid : pids) {
             //绑定角色权限关系
             TabRolePermission tabRolePermission = new TabRolePermission();
-            //设置创建时间
-            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            tabRolePermission.setCreateTime(df.format(new Date()));
             //绑定角色id
             tabRolePermission.setSysRoleId(roleId);
             tabRolePermission.setSysPermissionId(pid);
@@ -110,47 +103,20 @@ public class RoleServiceImpl implements RoleService {
     @Transactional(rollbackFor = Exception.class)
     public boolean updateRoleById(TabRole tabRole, String[] pids) {
         //实体化实体类,用来接收更新的数据
-        TabRolePermission tabRolePermissionLater = new TabRolePermission();
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        tabRole.setLastUpdateTime(df.format(new Date()));
-
+        TabRolePermission tabRolePermission = new TabRolePermission();
         try {
             //修改角色
             roleDao.updateRoleById(tabRole);
-
             if (pids != null && pids.length > 0) {
-                //获取权限id
-                //查询选择的权限与当前角色在关系表中的所有数据，获取主键id
-                List<TabRolePermission> tabRolePermissionList = queryByRoleId(tabRole.getId());
-
+                //删除原有数据
+                roleDao.deleteRoleAndPer(tabRole.getId());
                 for (String pid : pids) {
-                    //查询对应角色的角色权限关系的数据
-                    //查询选择的权限与当前角色在关系表中的数据
-                    TabRolePermission tabRolePermissionMiddle = roleDao.queryRoleAndPerForRow(tabRole.getId(), pid);
-                    String createTime = "";
-                    //如果存在数据则用之前的创建日期，反之则为当前日期
-                    if (tabRolePermissionMiddle != null) {
-                        createTime = tabRolePermissionMiddle.getCreateTime();
-                        //设置创建时间
-                        tabRolePermissionLater.setCreateTime(createTime);
-                    } else {
-                        //设置创建时间
-                        tabRolePermissionLater.setCreateTime(df.format(new Date()));
-                    }
-                    //设置最后修改时间
-                    tabRolePermissionLater.setLastUpdateTime(df.format(new Date()));
                     //存储角色id
-                    tabRolePermissionLater.setSysRoleId(tabRole.getId());
+                    tabRolePermission.setSysRoleId(tabRole.getId());
                     //存储权限id
-                    tabRolePermissionLater.setSysPermissionId(pid);
-                    roleDao.addRoleAndPermission(tabRolePermissionLater);
-                }
-
-                if (tabRolePermissionList != null && tabRolePermissionList.size() > 0) {
-                    //删除所有此角色所有记录
-                    for (TabRolePermission tabRolePermissionBefore : tabRolePermissionList) {
-                        roleDao.deleteRoleAndPer(tabRolePermissionBefore.getId());
-                    }
+                    tabRolePermission.setSysPermissionId(pid);
+                    tabRolePermission.setLastUpdateTime(new Date());
+                    roleDao.addRoleAndPermission(tabRolePermission);
                 }
             }
             return true;
@@ -165,10 +131,8 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteRole(String roleId) {
-        //设置可用标识不可用，标识删除
-        String availabe = "0";
         try {
-            roleDao.updateRoleAvailable(availabe, roleId);
+            roleDao.updateRoleAvailable(roleId);
             return true;
         } catch (Exception e) {
             e.printStackTrace();

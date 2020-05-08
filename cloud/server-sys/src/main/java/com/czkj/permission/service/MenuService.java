@@ -14,58 +14,66 @@ import java.util.List;
 public interface MenuService {
 
     /**
-     * 根据父菜单，查询子菜单
-     * @param parentId 父菜单ID
-     */
-    List<TabPermission> queryMenuByParentId(String parentId, String available);
-
-
-    /**
-     * 新增资源
-     * @param tabPermission 实体接收参数
+     * 查询所有权限信息
+     *
+     * @param available 可用标识
      * @return
      */
-    boolean savePermission(TabPermission tabPermission);
+    List<TabPermission> getAllList(String available);
 
     /**
-     * 根据对应资源标识获取对应资源信息
-     * @param id 资源标识（id）
+     * 新增权限
+     *
+     * @param name 权限名
+     * @param urls url数组，一个权限可以新增多条url
      * @return
      */
-    TabPermission getTabPermission(String id);
+    boolean savePermission(String name, String[] urls);
 
     /**
-     * 查询所有菜单（不包含view和button）
-     * @param parentId 父级id
-     * @return
+     * 根据主键获取权限信息
+     *
+     * @param key 主键
      */
-    List<TabPermission> queryAllMenuNotButton(String parentId);
-
+    TabPermission getPermissionByKey(String key);
 
     /**
-     * 修改资源列表
-     * @param tabPermission 实体接收参数
+     * 修改权限数据
+     *
+     * @param name 权限名
+     * @param key  权限主键
+     * @param urls url数组
+     */
+    boolean updatePerByKey(String name, String key, String[] urls);
+
+    /**
+     * 检验信息是否存在
+     * @param name 权限名
+     * @param url 权限url
+     * @param keyId 主键id-用于修改校验标识
      * @return
      */
-    boolean updateTabPermission(TabPermission tabPermission);
+    boolean queryExit(String name,String url,String keyId);
+
+    /**
+     * 废弃指定资源
+     * @param key 主键id
+     * @return
+     */
+    boolean deleteTabpermission(String key);
+
+    /**
+     * 启用资源
+     * @param key 主键id
+     * @return
+     */
+    boolean enablePermission(String key);
 
     /**
      * 查询资源及对应角色信息
      * @param pid 资源id
      * @return
      */
-    TabRolePermission selectPermissionAndRole(String pid);
+    TabPermission getPermissionAndRole(String pid);
 
-    /**
-     * 废弃指定资源
-     * @param id 标识
-     * @return
-     */
-    boolean deleteTabpermission(String id);
-
-    /**
-     * 启用资源
-     * @return
-     */
-    boolean enablePermission(String id);
 }
