@@ -34,13 +34,11 @@ public interface RoleService {
     boolean validateRoleExit(String roleName, String roleCode,String keyid);
 
     /**
-     * 新增角色信息
-     * @param name 角色名
-     * @param code 角色编码
-     * @param pids 权限id-可以选择多种权限
+     *  新增角色信息
+     * @param tabRole 实体类接收参数
      * @return
      */
-    boolean saveRole(String name, String code, String[] pids);
+    boolean saveRole(TabRole tabRole);
 
     /**
      * 获取对应指定角色信息及角色对应权限
@@ -51,18 +49,16 @@ public interface RoleService {
 
     /**
      * 绑定角色权限关系存储关系数据
-     * @param roleId 角色id
-     * @param pids 权限id-多个
+     * @param tabRole
      * @return
      */
-    boolean savePermissionAndRole(String roleId, String[] pids);
+    boolean savePermissionAndRole(TabRole tabRole);
 
     /**
      * 修改角色信息
      * @param tabRole 实体类接收参数
-     * @param pids 权限id-多个
      */
-    boolean updateRoleById(TabRole tabRole, String[] pids);
+    boolean updateRoleById(TabRole tabRole);
 
 
     /**

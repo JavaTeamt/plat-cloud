@@ -35,7 +35,7 @@ public class MenuDaoImpl implements MenuDao {
     @Override
     public List<TabPermission> queryAllList(String available) {
         List<TabPermission> permissionList = new ArrayList<>();
-        String sql = "select id,name from tab_permission where 1=1 ";
+        String sql = "select id,name,remark from tab_permission where 1=1 ";
 
         if (StringUtils.isNotBlank(available)) {
             sql += "available = ?";
@@ -57,18 +57,19 @@ public class MenuDaoImpl implements MenuDao {
 
     @Override
     public List<TabPermissionUrl> queryAllUrlList(String perId) {
-        String sql = "select id,name from tab_permission_url where per_id =?";
+        String sql = "select name,remark from tab_permission_url where per_id =?";
         List<TabPermissionUrl> urlList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabPermissionUrl.class), perId);
         return urlList;
     }
 
     @Override
-    public String savePermission(String name) {
+    public String savePermission(String name, String remark) {
         //获取当前时间
         Timestamp timestamp = new Timestamp(new Date().getTime());
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        String sql = "insert into tab_permission(name,available,create_time) values(?,?,?)";
+
+        String sql = "insert into tab_permission(name,available,remark,create_time) values(?,?,?,?)";
         jdbcTemplate.update(sql, new PreparedStatementCreator() {
             @Override
             public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
@@ -84,19 +85,21 @@ public class MenuDaoImpl implements MenuDao {
     }
 
     @Override
-    public void savePerUrl(String url, String perId, Date lastUpdateTime) {
-        String sql = "insert into tab_permission_url(name,per_id,available,create_time,last_update_time) values(?,?,?,?,?)";
+    public void savePerUrl(String url, String perId, String describle, Date lastUpdateTime) {
+        String sql = "insert into tab_permission_url(name,per_id,available,remark,create_time,last_update_time) values(?,?,?,?,?,?)";
+        System.out.println("创建时间为：" + new Date() + ",最后修改日期为：" + lastUpdateTime);
         jdbcTemplate.update(sql, url, perId, "1", new Date(), lastUpdateTime);
     }
 
     @Override
     public TabPermission queryPermission(String key) {
-        String sql = "select id,name from tab_permission where id=?";
+        String sql = "select id,name,remark from tab_permission where id=?";
         SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(sql, key);
         while (sqlRowSet.next()) {
             TabPermission tabPermission = new TabPermission();
             tabPermission.setId(sqlRowSet.getString("id"));
             tabPermission.setName(sqlRowSet.getString("name"));
+            tabPermission.setRemark(sqlRowSet.getString("remark"));
             List<TabPermissionUrl> permissionUrls = queryAllUrlList(tabPermission.getId());
             if (permissionUrls.size() > 0) {
                 tabPermission.setUrlList(permissionUrls);
@@ -114,9 +117,9 @@ public class MenuDaoImpl implements MenuDao {
     }
 
     @Override
-    public void updatePermission(String name, String key) {
-        String sql = "update tab_permission set name=?,last_update_time=? where id =?";
-        jdbcTemplate.update(sql, name, new Date(), key);
+    public void updatePermission(String name, String remark, String key) {
+        String sql = "update tab_permission set name=?,remark = ?,last_update_time=? where id =?";
+        jdbcTemplate.update(sql, name, remark, new Date(), key);
     }
 
     @Override

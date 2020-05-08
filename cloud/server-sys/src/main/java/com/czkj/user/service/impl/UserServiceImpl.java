@@ -224,7 +224,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean updateUserAndRole(TabSubscriber tabSubscriber, String[] roleIds) {
+    public boolean updateUserAndRole(TabSubscriber tabSubscriber) {
         try {
             //修改用户信息
             MD5Util.md5Encode(tabSubscriber.getPassword());
@@ -236,19 +236,22 @@ public class UserServiceImpl implements UserService {
 //                    //调用实名认证的方法
 //                    Authentication(customerAndUser.getTabCustomer(), customerAndUser.getTabSubscriber().getId());
 //                }
-            if (roleIds != null && roleIds.length > 0) {
+            if (tabSubscriber.getTabRoleList() != null && tabSubscriber.getTabRoleList().size() > 0) {
                 //删除原先记录
                 userDao.deleteUserAndRole(tabSubscriber.getId());
-                for (String roleId : roleIds) {
+                for (TabRole tabRole : tabSubscriber.getTabRoleList()) {
                     //创建用户角色关系实体类，用于存储要添加的数据
                     TabUserRole tabUserRoleByAdd = new TabUserRole();
                     //设置用户id
                     tabUserRoleByAdd.setSysUserId(tabSubscriber.getId());
                     //存入角色id
-                    tabUserRoleByAdd.setSysRoleId(roleId);
+                    tabUserRoleByAdd.setSysRoleId(tabRole.getId());
                     tabUserRoleByAdd.setLastUpdateTime(new Date());
                     userDao.saveUserAndRole(tabUserRoleByAdd);
                 }
+            }else {
+                //删除原先记录
+                userDao.deleteUserAndRole(tabSubscriber.getId());
             }
             return true;
         } catch (Exception e) {
@@ -260,7 +263,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean addUserAndRole(TabSubscriber tabSubscriber, String[] roleIds) {
+    public boolean addUserAndRole(TabSubscriber tabSubscriber) {
 
         try {
             userRegister(tabSubscriber);
@@ -290,12 +293,12 @@ public class UserServiceImpl implements UserService {
             /**
              * 如果用户选择了对应角色，就添加用户角色关系绑定
              */
-            if (roleIds != null && roleIds.length > 0) {
-                for (String roleId : roleIds) {
+            if (tabSubscriber.getTabRoleList() != null && tabSubscriber.getTabRoleList().size() > 0) {
+                for (TabRole tabRole : tabSubscriber.getTabRoleList()) {
                     TabUserRole tabUserRole = new TabUserRole();
                     //绑定用户角色
                     tabUserRole.setSysUserId(tabSubscriber.getId());
-                    tabUserRole.setSysRoleId(roleId);
+                    tabUserRole.setSysRoleId(tabRole.getId());
                     //设置创建时间
                     tabUserRole.setCreateTime(new Date());
 

@@ -109,18 +109,16 @@ public interface UserService {
     /**
      * 修改用户
      * @param tabSubscriber 实体类接收参数
-     * @param roleIds 角色id
      * @return
      */
-    boolean updateUserAndRole(TabSubscriber tabSubscriber, String[] roleIds);
+    boolean updateUserAndRole(TabSubscriber tabSubscriber);
 
     /**
      * 新增用户(包括实名，及添加对角色)
      * @param tabSubscriber 用户实体类
-     * @param roleIds 角色id（一对多）
      * @return
      */
-    boolean addUserAndRole(TabSubscriber tabSubscriber, String[] roleIds);
+    boolean addUserAndRole(TabSubscriber tabSubscriber);
 
     /**
      * 删除用户

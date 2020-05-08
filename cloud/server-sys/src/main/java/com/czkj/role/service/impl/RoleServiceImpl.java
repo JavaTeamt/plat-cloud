@@ -1,5 +1,6 @@
 package com.czkj.role.service.impl;
 
+import com.czkj.common.entity.TabPermission;
 import com.czkj.common.entity.TabRole;
 import com.czkj.common.entity.TabRolePermission;
 import com.czkj.role.dao.RoleDao;
@@ -52,15 +53,16 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean saveRole(String name, String code, String[] pids) {
+    public boolean saveRole(TabRole tabRole) {
 
         try {
             //执行添加方法，返回主键id
-
-            String id = roleDao.addRole(name,code);
+            String keyId = roleDao.addRole(tabRole.getName(),tabRole.getCode());
+            //将返回的主键放进实体类存储
+            tabRole.setId(keyId);
             //绑定权限-如果赋予的权限
-            if (pids != null && pids.length > 0) {
-                savePermissionAndRole(id, pids);
+            if (tabRole.getTabPermissions() != null && tabRole.getTabPermissions().size() > 0) {
+                savePermissionAndRole(tabRole);
             }
             return true;
         } catch (Exception e) {
@@ -73,14 +75,14 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean savePermissionAndRole(String roleId, String[] pids) {
+    public boolean savePermissionAndRole(TabRole tabRole) {
         //如果选择对应权限则绑定对应权限,可选择多个权限
-        for (String pid : pids) {
+        for (TabPermission tabPermission : tabRole.getTabPermissions()) {
             //绑定角色权限关系
             TabRolePermission tabRolePermission = new TabRolePermission();
             //绑定角色id
-            tabRolePermission.setSysRoleId(roleId);
-            tabRolePermission.setSysPermissionId(pid);
+            tabRolePermission.setSysRoleId(tabRole.getId());
+            tabRolePermission.setSysPermissionId(tabPermission.getId());
             try {
                 roleDao.addRoleAndPermission(tabRolePermission);
             } catch (Exception e) {
@@ -101,23 +103,26 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean updateRoleById(TabRole tabRole, String[] pids) {
+    public boolean updateRoleById(TabRole tabRole) {
         //实体化实体类,用来接收更新的数据
         TabRolePermission tabRolePermission = new TabRolePermission();
         try {
             //修改角色
             roleDao.updateRoleById(tabRole);
-            if (pids != null && pids.length > 0) {
+            if (tabRole.getTabPermissions() != null && tabRole.getTabPermissions().size() > 0) {
                 //删除原有数据
                 roleDao.deleteRoleAndPer(tabRole.getId());
-                for (String pid : pids) {
+                for (TabPermission tabPermission: tabRole.getTabPermissions()) {
                     //存储角色id
                     tabRolePermission.setSysRoleId(tabRole.getId());
                     //存储权限id
-                    tabRolePermission.setSysPermissionId(pid);
+                    tabRolePermission.setSysPermissionId(tabPermission.getId());
                     tabRolePermission.setLastUpdateTime(new Date());
                     roleDao.addRoleAndPermission(tabRolePermission);
                 }
+            }else {
+                //删除原有数据
+                roleDao.deleteRoleAndPer(tabRole.getId());
             }
             return true;
 

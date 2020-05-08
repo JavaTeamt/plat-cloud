@@ -1,7 +1,10 @@
 package com.czkj.auth.entity;
 
+import io.swagger.annotations.ApiModelProperty;
+
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author SunMin
@@ -29,7 +32,7 @@ public class TabSubscriber implements Serializable {
     /**
      * 客户id
      */
-    private Long  custid;
+    private Long custid;
 
     /**
      * 登录状态
@@ -45,6 +48,8 @@ public class TabSubscriber implements Serializable {
      * 创建时间
      */
     private Date createTime;
+
+    private List<TabRole> tabRoleList;
 
 
     public String getId() {
@@ -103,6 +108,14 @@ public class TabSubscriber implements Serializable {
         this.createTime = createTime;
     }
 
+    public List<TabRole> getTabRoleList() {
+        return tabRoleList;
+    }
+
+    public void setTabRoleList(List<TabRole> tabRoleList) {
+        this.tabRoleList = tabRoleList;
+    }
+
     @Override
     public String toString() {
         return "TabSubscriber{" +
@@ -113,6 +126,7 @@ public class TabSubscriber implements Serializable {
                 ", loginStatus='" + loginStatus + '\'' +
                 ", headImg='" + headImg + '\'' +
                 ", createTime=" + createTime +
+                ", tabRoleList=" + tabRoleList +
                 '}';
     }
 }

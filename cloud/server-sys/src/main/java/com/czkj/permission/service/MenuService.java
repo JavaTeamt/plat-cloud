@@ -23,12 +23,10 @@ public interface MenuService {
 
     /**
      * 新增权限
-     *
-     * @param name 权限名
-     * @param urls url数组，一个权限可以新增多条url
+     * @param tabPermission 实体类接收参数
      * @return
      */
-    boolean savePermission(String name, String[] urls);
+    boolean savePermission(TabPermission tabPermission);
 
     /**
      * 根据主键获取权限信息
@@ -39,12 +37,10 @@ public interface MenuService {
 
     /**
      * 修改权限数据
-     *
-     * @param name 权限名
-     * @param key  权限主键
-     * @param urls url数组
+     * @param tabPermission 使用实体类接收参数
+     * @return
      */
-    boolean updatePerByKey(String name, String key, String[] urls);
+    boolean updatePerByKey(TabPermission tabPermission);
 
     /**
      * 检验信息是否存在

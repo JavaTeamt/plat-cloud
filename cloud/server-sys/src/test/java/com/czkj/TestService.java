@@ -19,11 +19,11 @@ public class TestService {
 
     @Autowired
     private MenuDao menuDao;
-
-    @Test
-    public void test(){
-        String name = "test";
-        String result = menuDao.savePermission(name);
-        System.out.println("结果=="+result);
-    }
+//
+//    @Test
+//    public void test(){
+//        String name = "test";
+//        String result = menuDao.savePermission(name);
+//        System.out.println("结果=="+result);
+//    }
 }

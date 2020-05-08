@@ -11,11 +11,14 @@ public class TabPermissionUrl implements Serializable {
     @ApiModelProperty(name = "id",value = "主键",hidden = true)
     private Integer id;
 
-    @ApiModelProperty(name = "name",value = "URL")
+    @ApiModelProperty(name = "name",value = "URL",required = true)
     private String name;
 
     @ApiModelProperty(name = "perId",value = "权限id")
     private Integer perId;
+
+    @ApiModelProperty(name = "remark",value = "描述")
+    private String remark;
 
     @ApiModelProperty(name = "createTime",value = "创建时间",hidden = true)
     private Date createTime;
@@ -63,12 +66,21 @@ public class TabPermissionUrl implements Serializable {
         this.lastUpdateTime = lastUpdateTime;
     }
 
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
+
     @Override
     public String toString() {
         return "TabPermissionUrl{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", perId=" + perId +
+                ", remark='" + remark + '\'' +
                 ", createTime=" + createTime +
                 ", lastUpdateTime=" + lastUpdateTime +
                 '}';

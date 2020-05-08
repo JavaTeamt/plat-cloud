@@ -1,8 +1,11 @@
 package com.czkj.auth.service.impl;
 
 import com.czkj.auth.dao.LoginDao;
+import com.czkj.auth.entity.TabRole;
 import com.czkj.auth.entity.TabSubscriber;
+import com.czkj.auth.service.LoginService;
 import com.czkj.exception.BusinessException;
+import com.czkj.res.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -31,13 +34,24 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Autowired(required = false)
     private LoginDao loginDao;
 
+    @Resource
+    private LoginService loginService;
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         log.info("username:" + username);
         TabSubscriber user = loginDao.login(username);
         if (user != null) {
             List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+            //获取角色信息
+            Response<TabSubscriber> response = loginService.showUserAndRoleById(username);
+            TabSubscriber data = response.getData();
+            if (data.getTabRoleList()!=null&&data.getTabRoleList().size()>0){
+                for (TabRole tabRole : data.getTabRoleList()) {
+                    authorities.add(new SimpleGrantedAuthority(tabRole.getName()));
+                }
+            }
+            log.info("用户对应的角色=="+data.getTabRoleList());
             try {
                 //登录成功，则修改用户登录状态
                 loginDao.updateLoginStatus(username);

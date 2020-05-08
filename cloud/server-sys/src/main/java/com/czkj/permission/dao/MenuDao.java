@@ -35,15 +35,17 @@ public interface MenuDao {
     /**
      * 新增权限数据及选择对应URL
      * @param name 权限名
+     * @param remark 权限描述
      */
-    String savePermission(String name);
+    String savePermission(String name,String remark);
 
     /**
      * 新增权限URL
      * @param url url
      * @param perId 权限id
+     * @param describle 权限url描述
      */
-    void savePerUrl(String url, String perId, Date lastUpdateTime);
+    void savePerUrl(String url,  String perId, String describle,Date lastUpdateTime);
 
     /**
      * 根据主键获取权限信息
@@ -62,8 +64,9 @@ public interface MenuDao {
      * 修改权限数据
      * @param name 权限名
      * @param key 权限主键
+     * @param remark 权限描述信息
      */
-    void updatePermission(String name,String key);
+    void updatePermission(String name,String remark,String key);
 
     /**
      * 删除指定权限id的URL

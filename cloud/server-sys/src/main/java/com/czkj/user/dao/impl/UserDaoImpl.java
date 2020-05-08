@@ -52,7 +52,7 @@ public class UserDaoImpl<T> implements UserDao<T> {
         SqlRowSet sqlRowSet = null;
         if (StringUtils.isNotBlank(keyId)){
             //定义sql
-            String sql = "select id,mobile,password,headimg,loginstatus from tab_subscriber where " + key + "=? and id=?";
+            String sql = "select id,mobile,password,headimg,loginstatus from tab_subscriber where " + key + "=? and id<>?";
             sqlRowSet = jdbcTemplate.queryForRowSet(sql, value,keyId);
         }else {
             //定义sql
@@ -149,8 +149,8 @@ public class UserDaoImpl<T> implements UserDao<T> {
                 tabSubscriber.setTabCustomer(tabCustomer);
             }
             //获取对应角色信息
+            List<TabRole> tabRoles = new ArrayList<>();
             for (TabRole tabRole : queryRoleList(tabSubscriber.getId())) {
-                List<TabRole> tabRoles = new ArrayList<>();
                 tabRoles.add(tabRole);
                 tabSubscriber.setTabRoleList(tabRoles);
             }
@@ -199,8 +199,8 @@ public class UserDaoImpl<T> implements UserDao<T> {
 //            //获取对应客户数据
 //            TabCustomer tabCustomer = selectCustomerByUid(tabSubscriber.getId());
 //            tabSubscriber.setTabCustomer(tabCustomer);
+            List<TabRole> tabRoles = new ArrayList<>();
             for (TabRole tabRole : queryRoleList(tabSubscriber.getId())) {
-                List<TabRole> tabRoles = new ArrayList<>();
                 tabRoles.add(tabRole);
                 tabSubscriber.setTabRoleList(tabRoles);
             }
@@ -236,9 +236,9 @@ public class UserDaoImpl<T> implements UserDao<T> {
     }
 
     @Override
-    public void deleteUserAndRole(String keyId) {
-        String sql = "delete from tab_user_role where id=?";
-        jdbcTemplate.update(sql, keyId);
+    public void deleteUserAndRole(String userId) {
+        String sql = "delete from tab_user_role where sys_user_id=?";
+        jdbcTemplate.update(sql, userId);
     }
 
 

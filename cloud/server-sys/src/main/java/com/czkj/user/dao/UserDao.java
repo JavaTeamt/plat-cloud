@@ -135,10 +135,10 @@ public interface UserDao<T> {
     void deleteUser(String userid);
 
     /**
-     * 根据用户角色关系表主键id删除指定记录
-     * @param keyId 主键id
+     * 根据用户角色关系表中用户id删除指定记录
+     * @param userId 用户id
      */
-    void deleteUserAndRole(String keyId);
+    void deleteUserAndRole(String userId);
 
 
 

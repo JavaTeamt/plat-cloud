@@ -5,10 +5,7 @@ import com.czkj.common.entity.TabRolePermission;
 import com.czkj.exception.ExceptionHandleAdvice;
 import com.czkj.permission.service.MenuService;
 import com.czkj.res.Response;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +31,7 @@ public class MenuController {
     private static final Logger log = LoggerFactory.getLogger(ExceptionHandleAdvice.class);
 
     @ApiOperation(value = "显示所有权限数据及URL", notes = "显示所有权限数据及URL")
-    @ApiImplicitParam(name = "available", value = "可用标识", required = false, dataType = "String")
+    @ApiImplicitParam(name = "available", value = "可用标识", paramType = "query",required = false, dataType = "String")
     @GetMapping("/getAllList")
     public List<TabPermission> getAllList(String available) {
         log.info("是否可用：" + available);
@@ -42,13 +39,11 @@ public class MenuController {
     }
 
     @ApiOperation(value = "新增权限及添加对应URL", notes = "新增权限及添加对应URL")
-    @ApiImplicitParams(value = {@ApiImplicitParam(name = "name", value = "权限名", paramType ="query",required = true, dataType = "String"),
-            @ApiImplicitParam(name = "urls", value = "url数组", paramType = "query", allowMultiple = true, dataType = "String")})
-    @PostMapping("/savePermission")
-    public Response savePermission(String name, String[] urls) {
-        Response response = vlidateExit(name, urls,null);
+    @RequestMapping(value = "/savePermission",produces = "application/json",method = RequestMethod.POST)
+    public Response savePermission(@RequestBody TabPermission tabPermission) {
+        Response response = vlidateExit(tabPermission);
         if (response.getCode().equals("0")) {
-            boolean result = menuService.savePermission(name, urls);
+            boolean result = menuService.savePermission(tabPermission);
             if (result) {
                 return Response.success().message("新增成功");
             }
@@ -66,14 +61,11 @@ public class MenuController {
     }
 
     @ApiOperation(value = "修改对应权限数据", notes = "修改对应权限数据")
-    @ApiImplicitParams({@ApiImplicitParam(name = "key", value = "主键id", required = true, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "name", value = "权限名",paramType = "query", required = true, dataType = "String"),
-            @ApiImplicitParam(name = "urls", value = "url数组", paramType = "query", allowMultiple = true, dataType = "String")})
-    @PutMapping("/updatePerByKey")
-    public Response updatePerByKey(String key, String name, String[] urls) {
-        Response response = vlidateExit(name, urls,key);
+    @RequestMapping(value = "/updatePerByKey",produces = "application/json",method = RequestMethod.PUT)
+    public Response updatePerByKey(@RequestBody TabPermission tabPermission) {
+        Response response = vlidateExit(tabPermission);
         if (response.getCode().equals("0")) {
-            boolean result = menuService.updatePerByKey(name, key, urls);
+            boolean result = menuService.updatePerByKey(tabPermission);
             if (result) {
                 return Response.success().message("修改成功");
             }
@@ -82,21 +74,21 @@ public class MenuController {
         return response;
     }
 
-    private Response vlidateExit(String name, String[] urls,String keyId) {
+    private Response vlidateExit(TabPermission tabPermission) {
         //先进行表单的一些校验，校验成功进行用户注册
-        if (StringUtils.isNotBlank(name)) {
-            boolean result = menuService.queryExit(name, null,keyId);
+        if (StringUtils.isNotBlank(tabPermission.getName())) {
+            boolean result = menuService.queryExit(tabPermission.getName(), null,tabPermission.getId());
             if (!result) {
                 //权限已存在
                 return Response.failure("5120", "权限已存在");
             }
         }
-        if (urls != null && urls.length > 0) {
-            for (int i = 0; i < urls.length; i++) {
-                boolean result = menuService.queryExit(null, urls[i],keyId);
+        if (tabPermission.getUrlList() != null && tabPermission.getUrlList().size() > 0) {
+            for (int i = 0; i < tabPermission.getUrlList().size(); i++) {
+                boolean result = menuService.queryExit(null, tabPermission.getUrlList().get(i).getName(),tabPermission.getId());
                 if (!result) {
                     //URL已存在
-                    return Response.failure("5121", "URL" + urls[i] + "已存在");
+                    return Response.failure("5121", "URL" + tabPermission.getUrlList().get(i).getName() + "已存在");
                 }
             }
         }

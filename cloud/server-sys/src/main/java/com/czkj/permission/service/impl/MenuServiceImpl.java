@@ -40,21 +40,21 @@ public class MenuServiceImpl implements MenuService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean savePermission(String name, String[] urls) {
-        List<String> list = new ArrayList();
+    public boolean savePermission(TabPermission tabPermission) {
+        List<TabPermissionUrl> list = new ArrayList();
         try {
             //新增权限，返回主键id
-            String key = menuDao.savePermission(name);
+            String key = menuDao.savePermission(tabPermission.getName(),tabPermission.getRemark());
             //获取url数据，添加权限对应url
-            if (urls != null && urls.length > 0) {
+            if (tabPermission.getUrlList()!= null && tabPermission.getUrlList().size()> 0) {
                 //数组去重
-                for (int i = 0; i < urls.length; i++) {
-                    if (!list.contains(urls[i])) {
-                        list.add(urls[i]);
+                for (int i = 0; i < tabPermission.getUrlList().size(); i++) {
+                    if (!list.contains(tabPermission.getUrlList().get(i))) {
+                        list.add(tabPermission.getUrlList().get(i));
                     }
                 }
-                for (String url : list.toArray(new String[list.size()])) {
-                    menuDao.savePerUrl(url, key, null);
+                for (TabPermissionUrl tabPermissionUrl : list) {
+                    menuDao.savePerUrl(tabPermissionUrl.getName(), key, tabPermissionUrl.getRemark(),null);
                 }
             }
             return true;
@@ -72,24 +72,27 @@ public class MenuServiceImpl implements MenuService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean updatePerByKey(String name, String key, String[] urls) {
-        List<String> list = new ArrayList();
+    public boolean updatePerByKey(TabPermission tabPermission) {
+        List<TabPermissionUrl> list = new ArrayList();
         try {
             //修改权限数据
-            menuDao.updatePermission(name, key);
-            //接收权限对应的URL
-            if (urls != null && urls.length > 0) {
+            menuDao.updatePermission(tabPermission.getName(),tabPermission.getRemark(),tabPermission.getId());
+            //获取url数据，添加权限对应url
+            if (tabPermission.getUrlList()!= null && tabPermission.getUrlList().size()> 0) {
                 //数组去重
-                for (int i = 0; i < urls.length; i++) {
-                    if (!list.contains(urls[i])) {
-                        list.add(urls[i]);
+                for (int i = 0; i < tabPermission.getUrlList().size(); i++) {
+                    if (!list.contains(tabPermission.getUrlList().get(i))) {
+                        list.add(tabPermission.getUrlList().get(i));
                     }
                 }
                 //先删除原先url记录,重新添加
-                menuDao.deletePerUrlByPerId(key);
-                for (String url : list.toArray(new String[list.size()])) {
-                    menuDao.savePerUrl(url, key, new Date());
+                menuDao.deletePerUrlByPerId(tabPermission.getId());
+                for (TabPermissionUrl tabPermissionUrl : list) {
+                    menuDao.savePerUrl(tabPermissionUrl.getName(), tabPermission.getId(),tabPermissionUrl.getRemark(), new Date());
                 }
+            }else {
+                //先删除原先url记录,重新添加
+                menuDao.deletePerUrlByPerId(tabPermission.getId());
             }
             return true;
         } catch (Exception e) {

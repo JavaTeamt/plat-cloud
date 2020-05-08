@@ -63,11 +63,11 @@ public interface RoleDao {
     List<TabRolePermission> queryRoleOrPerForList(String roleId, String perId);
 
     /**
-     * 删除角色权限关系表指定主键数据
+     * 删除角色权限关系表指定指定角色id数据
      *
-     * @param keyId 主键id
+     * @param roleId 角色id
      */
-    void deleteRoleAndPer(String keyId);
+    void deleteRoleAndPer(String roleId);
 
     /**
      * 修改指定角色可用标识
