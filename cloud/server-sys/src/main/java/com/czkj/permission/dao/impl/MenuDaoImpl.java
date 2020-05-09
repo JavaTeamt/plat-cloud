@@ -2,8 +2,6 @@ package com.czkj.permission.dao.impl;
 
 import com.czkj.common.entity.TabPermission;
 import com.czkj.common.entity.TabPermissionUrl;
-import com.czkj.common.entity.TabRolePermission;
-import com.czkj.common.entity.TabSubscriber;
 import com.czkj.permission.dao.MenuDao;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,10 +71,11 @@ public class MenuDaoImpl implements MenuDao {
         jdbcTemplate.update(sql, new PreparedStatementCreator() {
             @Override
             public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
-                PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+                PreparedStatement ps = connection.prepareStatement(sql);
                 ps.setString(1, name);
                 ps.setString(2, "1");
-                ps.setTimestamp(3, timestamp);
+                ps.setString(3, remark);
+                ps.setTimestamp(4, timestamp);
                 return ps;
             }
         }, keyHolder);
@@ -85,7 +84,7 @@ public class MenuDaoImpl implements MenuDao {
     }
 
     @Override
-    public void savePerUrl(String url, String perId, String describle, Date lastUpdateTime) {
+    public void savePerUrl(String url, String perId, String remark, Date lastUpdateTime) {
         String sql = "insert into tab_permission_url(name,per_id,available,remark,create_time,last_update_time) values(?,?,?,?,?,?)";
         System.out.println("创建时间为：" + new Date() + ",最后修改日期为：" + lastUpdateTime);
         jdbcTemplate.update(sql, url, perId, "1", new Date(), lastUpdateTime);

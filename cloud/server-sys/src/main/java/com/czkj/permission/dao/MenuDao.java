@@ -43,9 +43,9 @@ public interface MenuDao {
      * 新增权限URL
      * @param url url
      * @param perId 权限id
-     * @param describle 权限url描述
+     * @param remark 权限url描述
      */
-    void savePerUrl(String url,  String perId, String describle,Date lastUpdateTime);
+    void savePerUrl(String url,  String perId, String remark,Date lastUpdateTime);
 
     /**
      * 根据主键获取权限信息
