@@ -5,10 +5,10 @@ spring:
   profiles: peer2
   application:
     name: eureka-server
-  security:
-    user:
-      name: admin
-      password: admin
+#  security:
+#    user:
+#      name: admin
+#      password: admin
 eureka:
   instance:
     hostname: peer2

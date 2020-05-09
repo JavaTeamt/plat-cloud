@@ -152,8 +152,8 @@ public class UserDaoImpl<T> implements UserDao<T> {
             List<TabRole> tabRoles = new ArrayList<>();
             for (TabRole tabRole : queryRoleList(tabSubscriber.getId())) {
                 tabRoles.add(tabRole);
-                tabSubscriber.setTabRoleList(tabRoles);
             }
+            tabSubscriber.setTabRoleList(tabRoles);
         }
         return new PageResult(currentPage, size, totalCount, userList);
     }
@@ -202,8 +202,8 @@ public class UserDaoImpl<T> implements UserDao<T> {
             List<TabRole> tabRoles = new ArrayList<>();
             for (TabRole tabRole : queryRoleList(tabSubscriber.getId())) {
                 tabRoles.add(tabRole);
-                tabSubscriber.setTabRoleList(tabRoles);
             }
+            tabSubscriber.setTabRoleList(tabRoles);
             return tabSubscriber;
         }
         return null;

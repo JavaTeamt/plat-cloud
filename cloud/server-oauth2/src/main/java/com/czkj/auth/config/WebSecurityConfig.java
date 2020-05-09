@@ -2,6 +2,7 @@ package com.czkj.auth.config;
 
 import com.czkj.auth.common.MD5PasswordEncoder;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -14,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
  * @date 2020-03-31
  */
 @EnableWebSecurity
+@Configuration
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
@@ -31,7 +33,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
                 .antMatchers("/**").permitAll()
-                .and().formLogin().permitAll();
+                .and().formLogin()
+                .loginPage("/login.html")  //使用自带的登录
+                .loginProcessingUrl("/login")
+                .permitAll();
     }
 
     @Override

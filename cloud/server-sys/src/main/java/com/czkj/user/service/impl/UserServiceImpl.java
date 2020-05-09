@@ -136,9 +136,9 @@ public class UserServiceImpl implements UserService {
                 : SystemConstant.LINUX_PROFILES_PATH;
 
         if (!headImg.isEmpty()) {
-
-            String newProfileName = profilesPath + UUID.randomUUID().toString() + headImg.getOriginalFilename();
-
+            //获取后缀
+            String suffix = headImg.getOriginalFilename().substring(headImg.getOriginalFilename().lastIndexOf("."));
+            String newProfileName = UUID.randomUUID().toString() +suffix;
             try {
                 // 磁盘保存
                 BufferedOutputStream out = null;
@@ -153,7 +153,7 @@ public class UserServiceImpl implements UserService {
                 out.flush();
                 out.close();
                 // 路径存库
-                userDao.updateUserJ(id, null, newProfileName);
+                userDao.updateUserJ(id, null, profilesPath+newProfileName);
                 return true;
             } catch (Exception e) {
                 e.printStackTrace();

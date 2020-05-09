@@ -3,7 +3,6 @@ package com.czkj.auth.service.impl;
 import com.czkj.auth.dao.LoginDao;
 import com.czkj.auth.entity.TabRole;
 import com.czkj.auth.entity.TabSubscriber;
-import com.czkj.auth.service.LoginService;
 import com.czkj.exception.BusinessException;
 import com.czkj.res.Response;
 import lombok.extern.slf4j.Slf4j;
@@ -34,9 +33,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Autowired(required = false)
     private LoginDao loginDao;
 
-    @Resource
-    private LoginService loginService;
-
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         log.info("username:" + username);
@@ -44,17 +40,16 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         if (user != null) {
             List<SimpleGrantedAuthority> authorities = new ArrayList<>();
             //获取角色信息
-            Response<TabSubscriber> response = loginService.showUserAndRoleById(username);
-            TabSubscriber data = response.getData();
-            if (data.getTabRoleList()!=null&&data.getTabRoleList().size()>0){
-                for (TabRole tabRole : data.getTabRoleList()) {
+            if (user.getTabRoleList()!=null&&user.getTabRoleList().size()>0){
+                for (TabRole tabRole : user.getTabRoleList()) {
                     authorities.add(new SimpleGrantedAuthority(tabRole.getName()));
                 }
             }
-            log.info("用户对应的角色=="+data.getTabRoleList());
+            log.info("用户对应的角色=="+user.getTabRoleList());
+            System.out.println("用户对应的角色=="+user.getTabRoleList());
             try {
                 //登录成功，则修改用户登录状态
-                loginDao.updateLoginStatus(username);
+                loginDao.updateLoginStatus(username,true);
             } catch (Exception e) {
                 log.error("修改登录转态时出错");
                 throw new BusinessException("异常-_-");
