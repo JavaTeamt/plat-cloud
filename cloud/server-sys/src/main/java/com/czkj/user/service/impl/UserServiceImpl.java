@@ -142,7 +142,6 @@ public class UserServiceImpl implements UserService {
             try {
                 // 磁盘保存
                 BufferedOutputStream out = null;
-
                 File folder = new File(profilesPath);
                 if (!folder.exists()) {
                     folder.mkdirs();
