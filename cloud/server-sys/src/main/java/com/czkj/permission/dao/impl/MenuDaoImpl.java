@@ -3,6 +3,7 @@ package com.czkj.permission.dao.impl;
 import com.czkj.common.entity.TabPermission;
 import com.czkj.common.entity.TabPermissionUrl;
 import com.czkj.permission.dao.MenuDao;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -25,6 +26,7 @@ import java.util.List;
  * @Modified By：
  */
 @Repository
+@Slf4j
 public class MenuDaoImpl implements MenuDao {
 
     @Autowired
@@ -62,6 +64,7 @@ public class MenuDaoImpl implements MenuDao {
 
     @Override
     public String savePermission(String name, String remark) {
+        log.info("url类型="+name.getClass().toString()+",描述信息类型="+remark.getClass().toString());
         //获取当前时间
         Timestamp timestamp = new Timestamp(new Date().getTime());
 
@@ -71,11 +74,14 @@ public class MenuDaoImpl implements MenuDao {
         jdbcTemplate.update(sql, new PreparedStatementCreator() {
             @Override
             public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
-                PreparedStatement ps = connection.prepareStatement(sql);
+                PreparedStatement ps = connection.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
                 ps.setString(1, name);
                 ps.setString(2, "1");
                 ps.setString(3, remark);
                 ps.setTimestamp(4, timestamp);
+                ParameterMetaData parameterMetaData = ps.getParameterMetaData();
+                int parameterCount = parameterMetaData.getParameterCount();
+                log.info("参数个数="+parameterCount);
                 return ps;
             }
         }, keyHolder);

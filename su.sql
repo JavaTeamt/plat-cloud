@@ -11,7 +11,7 @@
  Target Server Version : 80019
  File Encoding         : 65001
 
- Date: 06/05/2020 16:34:18
+ Date: 11/05/2020 10:57:00
 */
 
 SET NAMES utf8mb4;
@@ -55,41 +55,13 @@ CREATE TABLE `tab_customer`  (
   `mobile` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '手机号',
   `createtime` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 15 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin COMMENT = '用户表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin COMMENT = '用户表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
--- Table structure for tab_department
+-- Records of tab_customer
 -- ----------------------------
-DROP TABLE IF EXISTS `tab_department`;
-CREATE TABLE `tab_department`  (
-  `id` int(0) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'id',
-  `dep_code` varchar(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL COMMENT '部门编码',
-  `dep_name` varchar(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL COMMENT 'dep_name',
-  `parent_id` varchar(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL COMMENT '部门父级id',
-  `state` varchar(10) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL COMMENT '状态:1,启用，0，停用',
-  `remark` varchar(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL COMMENT '备注',
-  `create_time` datetime(0) NOT NULL COMMENT '创建时间',
-  `last_update_time` datetime(0) NULL DEFAULT NULL COMMENT '最后修改时间',
-  `remark1` varchar(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL COMMENT '备用字段1',
-  `remark2` varchar(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL COMMENT '备用字段2',
-  `is_sale` char(1) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL COMMENT '是否销售部门   1-销售部门  0-非销售部门',
-  `task` decimal(16, 2) NULL DEFAULT NULL COMMENT '当年目标',
-  `last_task` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL COMMENT '往年目标  格式：json格式的字符串',
-  `task_month` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL COMMENT '各月目标。用英文逗号隔开',
-  `company_id` varchar(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL COMMENT '公司id',
-  `type` varchar(16) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL COMMENT '部门类型',
-  PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Table structure for tab_dept_rel
--- ----------------------------
-DROP TABLE IF EXISTS `tab_dept_rel`;
-CREATE TABLE `tab_dept_rel`  (
-  `ancestor` int(0) NOT NULL COMMENT '祖先节点',
-  `descendant` int(0) NOT NULL COMMENT '后代节点',
-  PRIMARY KEY (`ancestor`, `descendant`) USING BTREE
-) ENGINE = MyISAM AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Fixed;
+INSERT INTO `tab_customer` VALUES (1, '孙敏', '1', '居民身份证', '430522199610305895', '1', '15580046122', '2020-05-07 00:00:00');
+INSERT INTO `tab_customer` VALUES (2, '烟给杨', '1', '居民身份证', '430566200510305895', '1', '15580046188', '2020-05-07 00:00:00');
 
 -- ----------------------------
 -- Table structure for tab_permission
@@ -97,19 +69,43 @@ CREATE TABLE `tab_dept_rel`  (
 DROP TABLE IF EXISTS `tab_permission`;
 CREATE TABLE `tab_permission`  (
   `id` int(0) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键',
-  `name` varchar(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL COMMENT '资源名称',
-  `type` varchar(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL COMMENT '资源类型：menu,button,auth',
-  `url` varchar(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL COMMENT '访问url地址',
-  `per_code` varchar(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL COMMENT '权限代码字符串/menu=>vue name',
-  `clazz` varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL COMMENT '样式',
-  `parent_id` varchar(36) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL COMMENT '父结点id',
-  `parent_ids` varchar(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL COMMENT '父结点id列表串',
-  `sort_string` varchar(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL COMMENT '排序号',
+  `name` varchar(20) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL COMMENT '资源名称',
   `available` char(1) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL COMMENT '是否可用,1：可用，0不可用',
+  `remark` varchar(20) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL COMMENT '描述',
   `create_time` datetime(0) NOT NULL COMMENT '创建时间',
   `last_update_time` datetime(0) NULL DEFAULT NULL COMMENT '最后修改时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of tab_permission
+-- ----------------------------
+INSERT INTO `tab_permission` VALUES (1, '超级管理员', '1', '拥有所有权限', '2020-05-12 16:45:00', '2020-05-08 07:54:32');
+INSERT INTO `tab_permission` VALUES (2, 'test', '1', NULL, '2020-05-07 14:47:33', NULL);
+INSERT INTO `tab_permission` VALUES (3, 'test3', '1', NULL, '2020-05-13 09:56:43', '2020-05-08 09:56:49');
+INSERT INTO `tab_permission` VALUES (4, 'test5', '1', '用于测试', '2020-05-11 09:21:12', NULL);
+
+-- ----------------------------
+-- Table structure for tab_permission_url
+-- ----------------------------
+DROP TABLE IF EXISTS `tab_permission_url`;
+CREATE TABLE `tab_permission_url`  (
+  `id` int(0) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `name` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'url',
+  `per_id` int(0) NOT NULL COMMENT '权限id',
+  `available` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '可用标识',
+  `remark` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '描述',
+  `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建日期',
+  `last_update_time` datetime(0) NULL DEFAULT NULL COMMENT '修改日期',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of tab_permission_url
+-- ----------------------------
+INSERT INTO `tab_permission_url` VALUES (3, 'www.cn', 2, '1', 'test', '2020-05-07 15:13:32', '2020-05-07 15:13:32');
+INSERT INTO `tab_permission_url` VALUES (4, 'localhost:8080', 1, '1', NULL, '2020-05-08 01:48:46', '2020-05-08 01:48:46');
+INSERT INTO `tab_permission_url` VALUES (5, 'localhost:8811', 1, '1', NULL, '2020-05-21 01:48:46', '2020-05-08 01:48:46');
 
 -- ----------------------------
 -- Table structure for tab_role
@@ -123,7 +119,15 @@ CREATE TABLE `tab_role`  (
   `create_time` datetime(0) NOT NULL COMMENT '创建时间',
   `last_update_time` datetime(0) NULL DEFAULT NULL COMMENT '最后修改时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of tab_role
+-- ----------------------------
+INSERT INTO `tab_role` VALUES (1, 'ROLE', 'ROLE', '1', '2020-05-12 18:21:42', '2020-05-20 18:21:44');
+INSERT INTO `tab_role` VALUES (2, 'TESTCODE', 'test1', '1', '2020-05-07 00:00:00', '2020-05-07 16:12:31');
+INSERT INTO `tab_role` VALUES (3, 'TEST2', 'TEST', '1', '2020-05-08 05:58:28', NULL);
+INSERT INTO `tab_role` VALUES (5, 'xxxx', 'baba权限', '1', '2020-05-08 14:15:45', '2020-05-08 14:25:49');
 
 -- ----------------------------
 -- Table structure for tab_role_permission
@@ -136,7 +140,16 @@ CREATE TABLE `tab_role_permission`  (
   `create_time` datetime(0) NOT NULL COMMENT '创建日期',
   `last_update_time` datetime(0) NULL DEFAULT NULL COMMENT '最后修改日期',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of tab_role_permission
+-- ----------------------------
+INSERT INTO `tab_role_permission` VALUES (1, '1', '1', '2020-05-20 18:21:59', '2020-05-19 18:22:01');
+INSERT INTO `tab_role_permission` VALUES (2, '2', '1', '2020-05-07 15:37:44', NULL);
+INSERT INTO `tab_role_permission` VALUES (3, '2', '2', '2020-05-07 15:37:44', NULL);
+INSERT INTO `tab_role_permission` VALUES (6, '5', '3', '2020-05-08 14:25:49', '2020-05-08 14:25:49');
+INSERT INTO `tab_role_permission` VALUES (7, '5', '2', '2020-05-08 14:25:49', '2020-05-08 14:25:49');
 
 -- ----------------------------
 -- Table structure for tab_subscriber
@@ -151,14 +164,17 @@ CREATE TABLE `tab_subscriber`  (
   `headimg` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '头像路径',
   `createtime` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of tab_subscriber
 -- ----------------------------
-INSERT INTO `tab_subscriber` VALUES ('1964160321', '15580046120', 'fae0b27c451c728867a567e8c1bb4e53', 14, '0', 'C:/Users/admin/Pictures/头像上传8a389a28-5a74-401d-96c6-b264d6d56e025406ba0052143.jpg', '2020-04-30 11:40:37');
-INSERT INTO `tab_subscriber` VALUES ('1964160347', '13873984611', '202cb962ac59075b964b07152d234b70', NULL, '0', 'C:/Users/admin/Pictures/头像上传//timg.jpg', '2020-05-02 13:19:50');
-INSERT INTO `tab_subscriber` VALUES ('1973849957', '15580046123', 'd81f9c1be2e08964bf9f24b15f0e4900', NULL, '0', 'C:/Users/admin/Pictures/头像上传//timg.jpg', '2020-05-06 15:50:31');
+INSERT INTO `tab_subscriber` VALUES ('1973849930', '15550046100', 'df6d2338b2b8fce1ec2f6dda0a630eb0', NULL, '1', 'C:/Users/admin/Pictures/头像上传/29f48d8d-049d-430b-a1a7-65b99ea6af8d.jpg', '2020-05-08 13:38:36');
+INSERT INTO `tab_subscriber` VALUES ('1973849950', '15550046120', '202cb962ac59075b964b07152d234b70', NULL, '1', 'C:/Users/admin/Pictures/头像上传/timg.jpg', '2020-05-07 07:33:44');
+INSERT INTO `tab_subscriber` VALUES ('1973849951', '15580046188', '202cb962ac59075b964b07152d234b70', 2, '0', 'C:/Users/admin/Pictures/头像上传//timg.jpg', '2020-05-07 04:08:44');
+INSERT INTO `tab_subscriber` VALUES ('1973849962', '10987654321', '202cb962ac59075b964b07152d234b70', NULL, '0', '传//timg.jpg', '2020-05-06 18:38:36');
+INSERT INTO `tab_subscriber` VALUES ('1973849967', '15387391598', 'df6d2338b2b8fce1ec2f6dda0a630eb0', NULL, '0', 'C:/Users/admin/Pictures/头像上传/timg.jpg', '2020-05-08 13:37:14');
+INSERT INTO `tab_subscriber` VALUES ('1973849976', '15387391587', 'df6d2338b2b8fce1ec2f6dda0a630eb0', NULL, '0', 'C:/Users/admin/Pictures/头像上传/timg.jpg', '2020-05-08 13:34:11');
 
 -- ----------------------------
 -- Table structure for tab_user_role
@@ -171,6 +187,14 @@ CREATE TABLE `tab_user_role`  (
   `create_time` datetime(0) NOT NULL COMMENT '创建时间',
   `last_update_time` datetime(0) NULL DEFAULT NULL COMMENT '最后修改时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 15 CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of tab_user_role
+-- ----------------------------
+INSERT INTO `tab_user_role` VALUES (1, '1973849950', '1', '2020-05-07 07:33:44', '2020-05-07 07:33:44');
+INSERT INTO `tab_user_role` VALUES (2, '1973849950', '2', '2020-05-07 07:33:44', '2020-05-07 07:33:44');
+INSERT INTO `tab_user_role` VALUES (11, '1973849951', '1', '2020-05-07 00:00:00', '2020-05-07 08:20:22');
+INSERT INTO `tab_user_role` VALUES (12, '1973849951', '2', '2020-05-07 00:00:00', '2020-05-07 08:20:22');
 
 SET FOREIGN_KEY_CHECKS = 1;

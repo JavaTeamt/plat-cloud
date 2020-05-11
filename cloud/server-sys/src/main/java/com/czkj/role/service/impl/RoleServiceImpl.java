@@ -109,9 +109,9 @@ public class RoleServiceImpl implements RoleService {
         try {
             //修改角色
             roleDao.updateRoleById(tabRole);
+            //删除原有关系表中指定角色id记录
+            roleDao.deleteRoleAndPer(tabRole.getId());
             if (tabRole.getTabPermissions() != null && tabRole.getTabPermissions().size() > 0) {
-                //删除原有数据
-                roleDao.deleteRoleAndPer(tabRole.getId());
                 for (TabPermission tabPermission: tabRole.getTabPermissions()) {
                     //存储角色id
                     tabRolePermission.setSysRoleId(tabRole.getId());
@@ -120,9 +120,6 @@ public class RoleServiceImpl implements RoleService {
                     tabRolePermission.setLastUpdateTime(new Date());
                     roleDao.addRoleAndPermission(tabRolePermission);
                 }
-            }else {
-                //删除原有数据
-                roleDao.deleteRoleAndPer(tabRole.getId());
             }
             return true;
 

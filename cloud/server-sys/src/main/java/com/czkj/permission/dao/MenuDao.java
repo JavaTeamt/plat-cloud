@@ -2,8 +2,6 @@ package com.czkj.permission.dao;
 
 import com.czkj.common.entity.TabPermission;
 import com.czkj.common.entity.TabPermissionUrl;
-import com.czkj.common.entity.TabRolePermission;
-import com.czkj.common.entity.TabSubscriber;
 
 import java.util.Date;
 import java.util.List;

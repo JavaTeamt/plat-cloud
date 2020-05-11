@@ -40,7 +40,7 @@ public class TabSubscriber implements Serializable {
     @ApiModelProperty(value="客户实体类",hidden=true)
     private TabCustomer tabCustomer;
 
-    @ApiModelProperty(value="角色实体类集合(一对多)",hidden=true)
+    @ApiModelProperty(value="角色实体类集合(一对多)")
     private List<TabRole> tabRoleList;
 
     public String getId() {

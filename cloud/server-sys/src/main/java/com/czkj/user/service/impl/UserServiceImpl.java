@@ -235,9 +235,9 @@ public class UserServiceImpl implements UserService {
 //                    //调用实名认证的方法
 //                    Authentication(customerAndUser.getTabCustomer(), customerAndUser.getTabSubscriber().getId());
 //                }
+            //删除原先关系表中指定用户id的记录
+            userDao.deleteUserAndRole(tabSubscriber.getId());
             if (tabSubscriber.getTabRoleList() != null && tabSubscriber.getTabRoleList().size() > 0) {
-                //删除原先记录
-                userDao.deleteUserAndRole(tabSubscriber.getId());
                 for (TabRole tabRole : tabSubscriber.getTabRoleList()) {
                     //创建用户角色关系实体类，用于存储要添加的数据
                     TabUserRole tabUserRoleByAdd = new TabUserRole();
@@ -248,9 +248,6 @@ public class UserServiceImpl implements UserService {
                     tabUserRoleByAdd.setLastUpdateTime(new Date());
                     userDao.saveUserAndRole(tabUserRoleByAdd);
                 }
-            }else {
-                //删除原先记录
-                userDao.deleteUserAndRole(tabSubscriber.getId());
             }
             return true;
         } catch (Exception e) {

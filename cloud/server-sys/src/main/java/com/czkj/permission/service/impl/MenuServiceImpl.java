@@ -49,7 +49,7 @@ public class MenuServiceImpl implements MenuService {
             if (tabPermission.getUrlList()!= null && tabPermission.getUrlList().size()> 0) {
                 //数组去重
                 for (int i = 0; i < tabPermission.getUrlList().size(); i++) {
-                    if (!list.contains(tabPermission.getUrlList().get(i))) {
+                    if (!list.contains(tabPermission.getUrlList().get(i))){
                         list.add(tabPermission.getUrlList().get(i));
                     }
                 }
@@ -77,6 +77,8 @@ public class MenuServiceImpl implements MenuService {
         try {
             //修改权限数据
             menuDao.updatePermission(tabPermission.getName(),tabPermission.getRemark(),tabPermission.getId());
+            //先删除原先url记录,重新添加
+            menuDao.deletePerUrlByPerId(tabPermission.getId());
             //获取url数据，添加权限对应url
             if (tabPermission.getUrlList()!= null && tabPermission.getUrlList().size()> 0) {
                 //数组去重
@@ -85,14 +87,9 @@ public class MenuServiceImpl implements MenuService {
                         list.add(tabPermission.getUrlList().get(i));
                     }
                 }
-                //先删除原先url记录,重新添加
-                menuDao.deletePerUrlByPerId(tabPermission.getId());
                 for (TabPermissionUrl tabPermissionUrl : list) {
                     menuDao.savePerUrl(tabPermissionUrl.getName(), tabPermission.getId(),tabPermissionUrl.getRemark(), new Date());
                 }
-            }else {
-                //先删除原先url记录,重新添加
-                menuDao.deletePerUrlByPerId(tabPermission.getId());
             }
             return true;
         } catch (Exception e) {

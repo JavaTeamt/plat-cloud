@@ -29,7 +29,7 @@ public class TabPermission implements Serializable {
     @ApiModelProperty(name = "createTime",value = "最后修改日期",hidden = true)
     private Date lastUpdateTime;
 
-    @ApiModelProperty(value = "url集合，一个权限对应多条url",name = "urlList",hidden = true)
+    @ApiModelProperty(value = "url集合，一个权限对应多条url",name = "urlList")
     private List<TabPermissionUrl> urlList=new ArrayList<>();
 
     public String getId() {
