@@ -6,6 +6,7 @@ import com.czkj.exception.ExceptionHandleAdvice;
 import com.czkj.res.Response;
 import com.czkj.role.service.RoleService;
 import com.czkj.utils.PageResult;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
@@ -24,6 +25,7 @@ import java.util.List;
  * @Date:Create：in 2020/4/24 12:52
  * @Modified By：
  */
+@Api(description = "角色管理生产接口")
 @RestController
 @RequestMapping("/role")
 public class RoleController {

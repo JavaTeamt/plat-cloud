@@ -15,6 +15,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +32,8 @@ public class MenuDaoImpl implements MenuDao {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+   private SimpleDateFormat format =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     @Override
     public List<TabPermission> queryAllList(String available) {
@@ -71,7 +74,7 @@ public class MenuDaoImpl implements MenuDao {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         String sql = "insert into tab_permission(name,available,remark,create_time) values(?,?,?,?)";
-        jdbcTemplate.update(sql, new PreparedStatementCreator() {
+        jdbcTemplate.update(new PreparedStatementCreator() {
             @Override
             public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
                 PreparedStatement ps = connection.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
@@ -79,9 +82,6 @@ public class MenuDaoImpl implements MenuDao {
                 ps.setString(2, "1");
                 ps.setString(3, remark);
                 ps.setTimestamp(4, timestamp);
-                ParameterMetaData parameterMetaData = ps.getParameterMetaData();
-                int parameterCount = parameterMetaData.getParameterCount();
-                log.info("参数个数="+parameterCount);
                 return ps;
             }
         }, keyHolder);
@@ -93,7 +93,7 @@ public class MenuDaoImpl implements MenuDao {
     public void savePerUrl(String url, String perId, String remark, Date lastUpdateTime) {
         String sql = "insert into tab_permission_url(name,per_id,available,remark,create_time,last_update_time) values(?,?,?,?,?,?)";
         System.out.println("创建时间为：" + new Date() + ",最后修改日期为：" + lastUpdateTime);
-        jdbcTemplate.update(sql, url, perId, "1", new Date(), lastUpdateTime);
+        jdbcTemplate.update(sql, url, perId,"1",remark, new Date(), lastUpdateTime);
     }
 
     @Override
@@ -145,7 +145,8 @@ public class MenuDaoImpl implements MenuDao {
         }
         while (sqlRowSet.next()) {
             TabPermission tabPermission = new TabPermission();
-            tabPermission.setName(name);
+            tabPermission.setName(sqlRowSet.getString("name"));
+            return tabPermission;
         }
         return null;
     }

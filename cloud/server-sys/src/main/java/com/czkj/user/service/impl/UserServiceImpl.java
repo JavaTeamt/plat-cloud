@@ -90,7 +90,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean forgetPassoword(String password, String id) {
         //存储加密后的密码
         password = MD5Util.md5Encode(password);
@@ -99,7 +98,6 @@ public class UserServiceImpl implements UserService {
             return true;
         } catch (Exception e) {
             e.printStackTrace();
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         }
         return false;
     }
@@ -128,7 +126,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean updateHeadImg(MultipartFile headImg, String id) {
         // 根据Windows和Linux配置不同的头像保存路径
         String OSName = System.getProperty("os.name");
@@ -156,7 +153,6 @@ public class UserServiceImpl implements UserService {
                 return true;
             } catch (Exception e) {
                 e.printStackTrace();
-                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             }
         }
         return false;
@@ -310,7 +306,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean deleteUser(String userid) {
         try {
             userDao.deleteUser(userid);

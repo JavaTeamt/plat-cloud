@@ -37,7 +37,7 @@ public class TabSubscriber implements Serializable {
     @ApiModelProperty(value="创建时间",name="createTime",hidden = true)
     private Date createTime;
 
-    @ApiModelProperty(value="客户实体类",hidden=true)
+    @ApiModelProperty(value="客户实体类")
     private TabCustomer tabCustomer;
 
     @ApiModelProperty(value="角色实体类集合(一对多)")

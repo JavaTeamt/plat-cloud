@@ -47,7 +47,7 @@ public class TabRole implements Serializable {
     @ApiModelProperty(value="最后修改时间",name="lastUpdateTime",hidden = true)
     private Date lastUpdateTime;
 
-    @ApiModelProperty(value="资源",hidden=true)
+    @ApiModelProperty(value="资源")
     private List<TabPermission> tabPermissions = new ArrayList<>();
 
     public String getId() {

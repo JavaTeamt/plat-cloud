@@ -80,7 +80,7 @@ public class MenuController {
             boolean result = menuService.queryExit(tabPermission.getName(), null,tabPermission.getId());
             if (!result) {
                 //权限已存在
-                return Response.failure("5120", "权限已存在");
+                return Response.failure("5120", tabPermission.getName()+"权限已存在");
             }
         }
         if (tabPermission.getUrlList() != null && tabPermission.getUrlList().size() > 0) {
@@ -88,7 +88,7 @@ public class MenuController {
                 boolean result = menuService.queryExit(null, tabPermission.getUrlList().get(i).getName(),tabPermission.getId());
                 if (!result) {
                     //URL已存在
-                    return Response.failure("5121", "URL" + tabPermission.getUrlList().get(i).getName() + "已存在");
+                    return Response.failure("5121", "URL:" + tabPermission.getUrlList().get(i).getName() + "已存在");
                 }
             }
         }

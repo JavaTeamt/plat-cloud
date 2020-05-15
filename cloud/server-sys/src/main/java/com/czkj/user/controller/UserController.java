@@ -99,11 +99,15 @@ public class UserController {
             @ApiImplicitParam(name = "phone", value = "新手机号", paramType = "query", required = true, dataType = "String")})
     @PutMapping("/updatePhone")
     public Response updatePhone(String phone, String userName) {
-        boolean b = userService.updateUserPhone(phone, userName);
-        if (b) {
-            return Response.success().message("手机号修改成功");
+        Response response = vUserExit(userName, phone,userName);
+        if (response.getCode().equals("0")) {
+            boolean b = userService.updateUserPhone(phone, userName);
+            if (b) {
+                return Response.success().message("手机号修改成功");
+            }
+            return Response.failure("手机号更换失败");
         }
-        return Response.failure("手机号更换失败");
+        return response;
     }
 
     @ApiOperation(value = "修改用户密码", notes = "修改用户密码")

@@ -14,31 +14,4 @@ public class SystemConstant {
     /** linux保存路径*/
     public static final String LINUX_PROFILES_PATH = "/root/super_meeting/profiles/";
 
-    /**
-     * 菜单类型
-     */
-    public enum MenuType {
-        /**
-         * 目录
-         */
-        CATALOG("1"),
-        /**
-         * 菜单
-         */
-        MENU("2"),
-        /**
-         * 按钮
-         */
-        BUTTON("3");
-
-        private String value;
-
-        MenuType(String value) {
-            this.value = value;
-        }
-
-        public String getValue() {
-            return value;
-        }
-    }
 }
