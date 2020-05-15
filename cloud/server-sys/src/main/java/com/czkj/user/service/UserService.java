@@ -92,19 +92,6 @@ public interface UserService {
      */
     List<TabRole> getRoleListByUId(String userId);
 
-    /**
-     * 获取用户身份信息
-     * @param id 登录账号
-     * @return
-     */
-    TabCustomer getCustomerByUid(String id);
-
-    /**
-     * 获取对应用户及关联客户信息
-     * @param id 登录账号
-     * @return
-     */
-    TabSubscriber getAllUserByUid(String id);
 
     /**
      * 修改用户

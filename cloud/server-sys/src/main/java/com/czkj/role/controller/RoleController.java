@@ -118,7 +118,7 @@ public class RoleController {
     public Response deleteRole(String roleId) {
         List<TabRolePermission> tabRolePermissionList = roleService.queryByRoleId(roleId);
         if (tabRolePermissionList.size() > 0) {
-            return Response.failure("4014", "不能删除角色+" + roleId + "，有权限-_-");
+            return Response.failure("4014", "不能删除绑定权限的角色");
         }
         boolean result = roleService.deleteRole(roleId);
         if (result) {

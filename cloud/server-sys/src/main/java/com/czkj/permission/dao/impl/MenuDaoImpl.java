@@ -3,6 +3,7 @@ package com.czkj.permission.dao.impl;
 import com.czkj.common.entity.TabPermission;
 import com.czkj.common.entity.TabPermissionUrl;
 import com.czkj.permission.dao.MenuDao;
+import com.czkj.utils.PageResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,18 +34,29 @@ public class MenuDaoImpl implements MenuDao {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-   private SimpleDateFormat format =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     @Override
-    public List<TabPermission> queryAllList(String available) {
+    public PageResult<TabPermission> queryAllList(String available, int currentPage, int size) {
+
+        //总条数
+        int totalCount = 0;
+
         List<TabPermission> permissionList = new ArrayList<>();
+        //查询总记录数
+        String sqlByCount = "select count(1) from tab_permission where 1=1 ";
+
         String sql = "select id,name,remark from tab_permission where 1=1 ";
 
         if (StringUtils.isNotBlank(available)) {
-            sql += "available = ?";
-            permissionList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabPermission.class), available);
+            sql += "and available = ? limit ?,?";
+            sqlByCount += "and available = ?";
+            totalCount = jdbcTemplate.queryForObject(sqlByCount, Integer.class, available);
+            permissionList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabPermission.class), available,currentPage,size);
         } else {
-            permissionList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabPermission.class));
+            sql += "limit ?,?";
+            totalCount = jdbcTemplate.queryForObject(sqlByCount, Integer.class);
+            permissionList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabPermission.class),currentPage,size);
         }
         //遍历过去URL信息
         if (permissionList.size() > 0) {
@@ -54,8 +66,7 @@ public class MenuDaoImpl implements MenuDao {
                 permissionList.get(i).setUrlList(tabPermissionUrls);
             }
         }
-
-        return permissionList;
+        return new PageResult<>(currentPage, size, totalCount, permissionList);
     }
 
     @Override
@@ -67,7 +78,7 @@ public class MenuDaoImpl implements MenuDao {
 
     @Override
     public String savePermission(String name, String remark) {
-        log.info("url类型="+name.getClass().toString()+",描述信息类型="+remark.getClass().toString());
+        log.info("url类型=" + name.getClass().toString() + ",描述信息类型=" + remark.getClass().toString());
         //获取当前时间
         Timestamp timestamp = new Timestamp(new Date().getTime());
 
@@ -77,7 +88,7 @@ public class MenuDaoImpl implements MenuDao {
         jdbcTemplate.update(new PreparedStatementCreator() {
             @Override
             public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
-                PreparedStatement ps = connection.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
+                PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
                 ps.setString(1, name);
                 ps.setString(2, "1");
                 ps.setString(3, remark);
@@ -93,7 +104,7 @@ public class MenuDaoImpl implements MenuDao {
     public void savePerUrl(String url, String perId, String remark, Date lastUpdateTime) {
         String sql = "insert into tab_permission_url(name,per_id,available,remark,create_time,last_update_time) values(?,?,?,?,?,?)";
         System.out.println("创建时间为：" + new Date() + ",最后修改日期为：" + lastUpdateTime);
-        jdbcTemplate.update(sql, url, perId,"1",remark, new Date(), lastUpdateTime);
+        jdbcTemplate.update(sql, url, perId, "1", remark, new Date(), lastUpdateTime);
     }
 
     @Override

@@ -5,6 +5,7 @@ import com.czkj.common.entity.TabRolePermission;
 import com.czkj.exception.ExceptionHandleAdvice;
 import com.czkj.permission.service.MenuService;
 import com.czkj.res.Response;
+import com.czkj.utils.PageResult;
 import io.swagger.annotations.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -31,11 +32,14 @@ public class MenuController {
     private static final Logger log = LoggerFactory.getLogger(ExceptionHandleAdvice.class);
 
     @ApiOperation(value = "显示所有权限数据及URL", notes = "显示所有权限数据及URL")
-    @ApiImplicitParam(name = "available", value = "可用标识", paramType = "query",required = false, dataType = "String")
+    @ApiImplicitParams({@ApiImplicitParam(name = "currentPage", value = "当前页", paramType = "query", required = true, dataType = "int"),
+            @ApiImplicitParam(name = "size", value = "每页显示条数", paramType = "query", required = true, dataType = "int"),
+            @ApiImplicitParam(name = "available", value = " 是否可用标识", paramType = "query", required = false, dataType = "String")})
     @GetMapping("/getAllList")
-    public List<TabPermission> getAllList(String available) {
-        log.info("是否可用：" + available);
-        return menuService.getAllList(available);
+    public Response<PageResult> getAllList(String available,int currentPage,int size) {
+        log.info("是否可用：" + available+",当前页："+currentPage+",每页显示条数："+size);
+        PageResult<TabPermission> pageResult = menuService.getAllList(available, currentPage, size);
+        return Response.success().data(pageResult);
     }
 
     @ApiOperation(value = "新增权限及添加对应URL", notes = "新增权限及添加对应URL")

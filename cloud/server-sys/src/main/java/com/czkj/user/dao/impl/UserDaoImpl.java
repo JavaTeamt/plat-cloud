@@ -196,9 +196,9 @@ public class UserDaoImpl<T> implements UserDao<T> {
     public TabSubscriber selectAllUserByUid(String id) {
         TabSubscriber tabSubscriber = selectUserByKey("id", id,null);
         if (tabSubscriber != null) {
-//            //获取对应客户数据
-//            TabCustomer tabCustomer = selectCustomerByUid(tabSubscriber.getId());
-//            tabSubscriber.setTabCustomer(tabCustomer);
+            //获取对应客户数据
+            TabCustomer tabCustomer = selectCustomerByUid(tabSubscriber.getId());
+            tabSubscriber.setTabCustomer(tabCustomer);
             List<TabRole> tabRoles = new ArrayList<>();
             for (TabRole tabRole : queryRoleList(tabSubscriber.getId())) {
                 tabRoles.add(tabRole);

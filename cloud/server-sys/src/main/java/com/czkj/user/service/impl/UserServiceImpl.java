@@ -121,8 +121,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public TabSubscriber getUserById(String id) {
-        TabSubscriber user = userDao.selectUserByKey("id", id,null);
-        return user;
+        TabSubscriber tabSubscriber = userDao.selectAllUserByUid(id);
+        return tabSubscriber;
     }
 
     @Override
@@ -204,17 +204,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<TabRole> getRoleListByUId(String userId) {
         return userDao.queryRoleList(userId);
-    }
-
-    @Override
-    public TabCustomer getCustomerByUid(String id) {
-        return userDao.selectCustomerByUid(id);
-    }
-
-    @Override
-    public TabSubscriber getAllUserByUid(String id) {
-        TabSubscriber tabSubscriber = userDao.selectAllUserByUid(id);
-        return tabSubscriber;
     }
 
     @Override

@@ -6,6 +6,7 @@ import com.czkj.common.entity.TabRolePermission;
 import com.czkj.common.entity.TabSubscriber;
 import com.czkj.permission.dao.MenuDao;
 import com.czkj.permission.service.MenuService;
+import com.czkj.utils.PageResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,8 +35,8 @@ public class MenuServiceImpl implements MenuService {
     private MenuDao menuDao;
 
     @Override
-    public List<TabPermission> getAllList(String available) {
-        return menuDao.queryAllList(available);
+    public PageResult<TabPermission> getAllList(String available, int currentPage, int size) {
+        return menuDao.queryAllList(available,currentPage,size);
     }
 
     @Override

@@ -175,23 +175,6 @@ public class UserController {
         return null;
     }
 
-    @ApiOperation(value = "显示身份信息,判断是否实名，实名显示身份信息，未实名则提供实名操作", notes = "显示身份信息,判断是否实名，实名显示身份信息，未实名则提供实名操作")
-    @ApiImplicitParam(name = "userName", value = "登录账号", paramType = "query", required = true, dataType = "String")
-    @GetMapping("/showCert")
-    public Response showCert(String userName) {
-        TabCustomer customerByUid = userService.getCustomerByUid(userName);
-        return Response.success(customerByUid);
-
-    }
-
-    @ApiOperation(value = "显示对应用户相关信息,用于编辑用户前显示", notes = "显示对应用户相关信息,用于编辑用户前显示")
-    @ApiImplicitParam(name = "id", value = "登录账号", required = true, paramType = "query", dataType = "String")
-    @GetMapping("/showUserAndRoleById")
-    public Response<TabSubscriber> showUserAndRoleById(@RequestParam("id") String userName) {
-        TabSubscriber tabSubscriber = userService.getAllUserByUid(userName);
-        return Response.success(tabSubscriber);
-    }
-
     @ApiOperation(value = "修改用户数据", notes = "修改用户数据")
     @RequestMapping(value = "/updateUserAndRole",produces = "application/json",method = RequestMethod.PUT)
     public Response updateUserAndRole(@RequestBody TabSubscriber tabSubscriber) {

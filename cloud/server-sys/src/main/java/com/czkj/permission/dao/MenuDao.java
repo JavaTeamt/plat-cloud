@@ -2,6 +2,7 @@ package com.czkj.permission.dao;
 
 import com.czkj.common.entity.TabPermission;
 import com.czkj.common.entity.TabPermissionUrl;
+import com.czkj.utils.PageResult;
 
 import java.util.Date;
 import java.util.List;
@@ -18,9 +19,11 @@ public interface MenuDao {
     /**
      * 查询所有权限信息
      * @param available 可用标识
+     * @param currentPage 当前页
+     * @param size 每页显示条数
      * @return
      */
-    List<TabPermission> queryAllList(String available);
+    PageResult<TabPermission> queryAllList(String available, int currentPage, int size);
 
 
     /**
