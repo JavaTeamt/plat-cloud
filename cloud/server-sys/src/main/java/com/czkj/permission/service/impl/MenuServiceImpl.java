@@ -35,7 +35,7 @@ public class MenuServiceImpl implements MenuService {
     private MenuDao menuDao;
 
     @Override
-    public PageResult<TabPermission> getAllList(String available, int currentPage, int size) {
+    public PageResult<TabPermission> getAllList(String available, Integer currentPage, Integer size) {
         return menuDao.queryAllList(available,currentPage,size);
     }
 
@@ -47,7 +47,7 @@ public class MenuServiceImpl implements MenuService {
             //新增权限，返回主键id
             String key = menuDao.savePermission(tabPermission.getName(),tabPermission.getRemark());
             //获取url数据，添加权限对应url
-            if (tabPermission.getUrlList()!= null && tabPermission.getUrlList().size()> 0) {
+            if (null!= tabPermission.getUrlList() && tabPermission.getUrlList().size()> 0) {
                 //数组去重
                 for (int i = 0; i < tabPermission.getUrlList().size(); i++) {
                     if (!list.contains(tabPermission.getUrlList().get(i))){
@@ -55,7 +55,8 @@ public class MenuServiceImpl implements MenuService {
                     }
                 }
                 for (TabPermissionUrl tabPermissionUrl : list) {
-                    menuDao.savePerUrl(tabPermissionUrl.getName(), key, tabPermissionUrl.getRemark(),null);
+                    tabPermissionUrl.setPerId(key);
+                    menuDao.savePerUrl(tabPermissionUrl);
                 }
             }
             return true;
@@ -81,7 +82,7 @@ public class MenuServiceImpl implements MenuService {
             //先删除原先url记录,重新添加
             menuDao.deletePerUrlByPerId(tabPermission.getId());
             //获取url数据，添加权限对应url
-            if (tabPermission.getUrlList()!= null && tabPermission.getUrlList().size()> 0) {
+            if (null!= tabPermission.getUrlList() && tabPermission.getUrlList().size()> 0) {
                 //数组去重
                 for (int i = 0; i < tabPermission.getUrlList().size(); i++) {
                     if (!list.contains(tabPermission.getUrlList().get(i))) {
@@ -89,7 +90,9 @@ public class MenuServiceImpl implements MenuService {
                     }
                 }
                 for (TabPermissionUrl tabPermissionUrl : list) {
-                    menuDao.savePerUrl(tabPermissionUrl.getName(), tabPermission.getId(),tabPermissionUrl.getRemark(), new Date());
+                    tabPermissionUrl.setPerId(tabPermission.getId());
+                    tabPermission.setLastUpdateTime(new Date());
+                    menuDao.savePerUrl(tabPermissionUrl);
                 }
             }
             return true;
@@ -104,13 +107,13 @@ public class MenuServiceImpl implements MenuService {
     public boolean queryExit(String name, String url,String keyId) {
         if (StringUtils.isNotBlank(name)) {
             TabPermission tabPermission = menuDao.queryPerByName(name,keyId);
-            if (tabPermission != null) {
+            if (null != tabPermission) {
                 return false;
             }
         }
         if (StringUtils.isNotBlank(url)) {
             TabPermissionUrl tabPermissionUrl = menuDao.queryPerUrlByUrl(url);
-            if (tabPermissionUrl != null) {
+            if (null != tabPermissionUrl) {
                 return false;
             }
         }
@@ -150,4 +153,5 @@ public class MenuServiceImpl implements MenuService {
     public TabPermission getPermissionAndRole(String pid) {
         return menuDao.queryPermissionAndRole(pid);
     }
+
 }

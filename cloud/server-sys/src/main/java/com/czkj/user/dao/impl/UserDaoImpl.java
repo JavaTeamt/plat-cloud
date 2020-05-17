@@ -48,13 +48,13 @@ public class UserDaoImpl<T> implements UserDao<T> {
     }
 
     @Override
-    public TabSubscriber selectUserByKey(String key, String value,String keyId) {
+    public TabSubscriber selectUserByKey(String key, String value, String keyId) {
         SqlRowSet sqlRowSet = null;
-        if (StringUtils.isNotBlank(keyId)){
+        if (StringUtils.isNotBlank(keyId)) {
             //定义sql
             String sql = "select id,mobile,password,headimg,loginstatus from tab_subscriber where " + key + "=? and id<>?";
-            sqlRowSet = jdbcTemplate.queryForRowSet(sql, value,keyId);
-        }else {
+            sqlRowSet = jdbcTemplate.queryForRowSet(sql, value, keyId);
+        } else {
             //定义sql
             String sql = "select id,mobile,password,headimg,loginstatus from tab_subscriber where " + key + "=?";
             sqlRowSet = jdbcTemplate.queryForRowSet(sql, value);
@@ -132,35 +132,42 @@ public class UserDaoImpl<T> implements UserDao<T> {
     }
 
     @Override
-    public PageResult<TabSubscriber> seletAllUser(int currentPage, int size) {
+    public PageResult<TabSubscriber> seletAllUser(Integer currentPage, Integer size) {
+        List<TabSubscriber> userList = new ArrayList<>();
 
+        String sql = "select id,mobile from tab_subscriber ";
         //查询用户所有记录总条数
         String sqlForCount = "select count(1) from tab_subscriber";
         //获取
         Integer totalCount = jdbcTemplate.queryForObject(sqlForCount, Integer.class);
 
-        //查询所有用户记录信息,返回数据集合遍历获取对应客户信息，及角色信息
-        List<TabSubscriber> userList = jdbcTemplate.query("select id,mobile from tab_subscriber limit ?,?", new BeanPropertyRowMapper<>(TabSubscriber.class), (currentPage - 1) * size, size);
+        if (null!=currentPage&&null!=size){
+            sql+="limit ?,?";
+            userList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabSubscriber.class), (currentPage - 1) * size, size);
 
+        }else {
+           userList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabSubscriber.class));
+
+        }
         for (TabSubscriber tabSubscriber : userList) {
             //获取去对应客户信息
             TabCustomer tabCustomer = selectCustomerByUid(tabSubscriber.getId());
             if (tabCustomer != null) {
                 tabSubscriber.setTabCustomer(tabCustomer);
             }
-            //获取对应角色信息
-            List<TabRole> tabRoles = new ArrayList<>();
-            for (TabRole tabRole : queryRoleList(tabSubscriber.getId())) {
-                tabRoles.add(tabRole);
-            }
-            tabSubscriber.setTabRoleList(tabRoles);
+//            //获取对应角色信息
+//            List<TabRole> tabRoles = new ArrayList<>();
+//            for (TabRole tabRole : queryRoleList(tabSubscriber.getId())) {
+//                tabRoles.add(tabRole);
+//            }
+//            tabSubscriber.setTabRoleList(tabRoles);
         }
         return new PageResult(currentPage, size, totalCount, userList);
     }
 
     @Override
     public List<TabRole> queryRoleList(String userId) {
-        String sql = "select role.id,role.code,role.name from tab_role role right JOIN tab_user_role userRole on role.id=userRole.sys_role_id left JOIN tab_subscriber user on userRole.sys_user_id = user.id where user.id=?";
+        String sql = "select role.id from tab_role role right JOIN tab_user_role userRole on role.id=userRole.sys_role_id left JOIN tab_subscriber user on userRole.sys_user_id = user.id where user.id=?";
         List<TabRole> roleList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabRole.class), userId);
         return roleList;
     }
@@ -194,34 +201,34 @@ public class UserDaoImpl<T> implements UserDao<T> {
 
     @Override
     public TabSubscriber selectAllUserByUid(String id) {
-        TabSubscriber tabSubscriber = selectUserByKey("id", id,null);
-        if (tabSubscriber != null) {
-            //获取对应客户数据
-            TabCustomer tabCustomer = selectCustomerByUid(tabSubscriber.getId());
-            tabSubscriber.setTabCustomer(tabCustomer);
-            List<TabRole> tabRoles = new ArrayList<>();
-            for (TabRole tabRole : queryRoleList(tabSubscriber.getId())) {
-                tabRoles.add(tabRole);
-            }
-            tabSubscriber.setTabRoleList(tabRoles);
-            return tabSubscriber;
-        }
-        return null;
+        TabSubscriber tabSubscriber = selectUserByKey("id", id, null);
+//        if (tabSubscriber != null) {
+//            //获取对应客户数据
+//            TabCustomer tabCustomer = selectCustomerByUid(tabSubscriber.getId());
+//            tabSubscriber.setTabCustomer(tabCustomer);
+//            List<TabRole> tabRoles = new ArrayList<>();
+//            for (TabRole tabRole : queryRoleList(tabSubscriber.getId())) {
+//                tabRoles.add(tabRole);
+//            }
+//            tabSubscriber.setTabRoleList(tabRoles);
+//            return tabSubscriber;
+//        }
+        return tabSubscriber;
     }
 
     @Override
-    public void saveUserAndRole(TabUserRole tabUserRole) {
+    public void saveUserAndRole(String roleId,String userId) {
         String sql = "insert into tab_user_role(sys_user_id,sys_role_id,create_time,last_update_time) values(?,?,?,?)";
-        jdbcTemplate.update(sql, tabUserRole.getSysUserId(),
-                tabUserRole.getSysRoleId(),
+        jdbcTemplate.update(sql, userId,
+                roleId,
                 new Date(),
-                tabUserRole.getLastUpdateTime());
+                new Date());
     }
 
     @Override
     public void updateUser(TabSubscriber user) {
-        String sql = "update tab_subscriber set mobile=?,password=? where id=?";
-        jdbcTemplate.update(sql, user.getMobile(), user.getPassword(), user.getId());
+        String sql = "update tab_subscriber mobile=?,password=? where id=?";
+        jdbcTemplate.update(sql,user.getMobile(), user.getPassword(), user.getId());
     }
 
 //    @Override

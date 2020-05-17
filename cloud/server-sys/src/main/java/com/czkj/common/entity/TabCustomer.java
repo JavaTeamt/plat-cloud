@@ -2,6 +2,7 @@ package com.czkj.common.entity;
 
 import io.swagger.annotations.ApiModelProperty;
 
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -17,15 +18,19 @@ public class TabCustomer implements Serializable {
     @ApiModelProperty(value="主键id",name="id",hidden = true)
     private String id;
 
+    @NotBlank(message = "姓名不能为空")
     @ApiModelProperty(value="姓名",name="name")
     private String name;
 
+    @NotBlank(message = "性别不能为空")
     @ApiModelProperty(value="性别",name="sex")
     private String sex;
 
+    @NotBlank(message = "证件类型不能为空")
     @ApiModelProperty(value="证件类型",name="certType")
     private String certType;
 
+    @NotBlank(message = "证件编码不能为空")
     @ApiModelProperty(value="证件编码",name="certid")
     private String certid;
 

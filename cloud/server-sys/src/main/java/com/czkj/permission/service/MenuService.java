@@ -1,9 +1,11 @@
 package com.czkj.permission.service;
 
 import com.czkj.common.entity.TabPermission;
+import com.czkj.common.entity.TabPermissionUrl;
 import com.czkj.common.entity.TabRolePermission;
 import com.czkj.utils.PageResult;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -22,7 +24,7 @@ public interface MenuService {
      * @param size 每页显示条数
      * @return
      */
-    PageResult<TabPermission> getAllList(String available, int currentPage, int size);
+    PageResult<TabPermission> getAllList(String available, Integer currentPage, Integer size);
 
     /**
      * 新增权限
@@ -74,5 +76,6 @@ public interface MenuService {
      * @return
      */
     TabPermission getPermissionAndRole(String pid);
+
 
 }

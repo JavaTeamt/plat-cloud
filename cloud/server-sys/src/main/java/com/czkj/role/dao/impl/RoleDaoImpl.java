@@ -38,7 +38,7 @@ public class RoleDaoImpl implements RoleDao {
     private MenuDao menuDao;
 
     @Override
-    public PageResult<TabRole> queryRoleList(int page, int size, String roleName, String available) {
+    public PageResult<TabRole> queryRoleList(Integer page, Integer size, String roleName, String available) {
 
         //初始化
         Integer totalCount = null;
@@ -52,45 +52,54 @@ public class RoleDaoImpl implements RoleDao {
         //查询全部角色信息
         String sql = "select id,code,name from tab_role where 1=1 ";
 
-        //如果满足条件就加条件查询
-        if (StringUtils.isNotBlank(roleName) && StringUtils.isNotBlank(available)) {
-            sql += "and available=? and name like concat('%',?,'%') limit ?,?";
-            sqlForCount += "and available=? and name like concat('%',?,'%') ";
-            totalCount = jdbcTemplate.queryForObject(sqlForCount, Integer.class, available, roleName);
-            roleList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabRole.class), available, roleName, (page - 1) * size, size);
-        } else if (StringUtils.isNotBlank(roleName)) {
-            sql += "and name like ? limit ?,?";
-            sqlForCount += "and name=? ";
-            totalCount = jdbcTemplate.queryForObject(sqlForCount, Integer.class, roleName);
-            roleList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabRole.class), roleName, (page - 1) * size, size);
+        if (null != page && null != size) {
+            //如果满足条件就加条件查询
+            if (StringUtils.isNotBlank(roleName) && StringUtils.isNotBlank(available)) {
+                sql += "and available=? and name like concat('%',?,'%') limit ?,?";
+                sqlForCount += "and available=? and name like concat('%',?,'%') ";
+                totalCount = jdbcTemplate.queryForObject(sqlForCount, Integer.class, available, roleName);
+                roleList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabRole.class), available, roleName, (page - 1) * size, size);
+            } else if (StringUtils.isNotBlank(roleName)) {
+                sql += "and name like ? limit ?,?";
+                sqlForCount += "and name=? ";
+                totalCount = jdbcTemplate.queryForObject(sqlForCount, Integer.class, roleName);
+                roleList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabRole.class), roleName, (page - 1) * size, size);
+            } else if (StringUtils.isNotBlank(available)) {
+                sql += "and available=? limit ?,?";
+                sqlForCount += "and available=? ";
+                totalCount = jdbcTemplate.queryForObject(sqlForCount, Integer.class, available);
+                roleList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabRole.class), available, (page - 1) * size, size);
+            } else {
+                sql += "limit ?,?";
+                totalCount = jdbcTemplate.queryForObject(sqlForCount, Integer.class);
+                roleList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabRole.class), (page - 1) * size, size);
+            }
+
+        } else if (StringUtils.isNotBlank(roleName) && StringUtils.isNotBlank(available)) {
+            sql += "and available=? and name like concat('%',?,'%')";
+            roleList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabRole.class), available, roleName);
         } else if (StringUtils.isNotBlank(available)) {
-            sql += "and available=? limit ?,?";
-            sqlForCount += "and available=? ";
-            totalCount = jdbcTemplate.queryForObject(sqlForCount, Integer.class, available);
-            roleList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabRole.class), available, (page - 1) * size, size);
+            sql += "and available=?";
+            roleList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabRole.class));
+        } else if (StringUtils.isNotBlank(roleName)) {
+            sql += "and name like ?";
+            roleList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabRole.class), roleName);
         } else {
-            sql += "limit ?,?";
-            totalCount = jdbcTemplate.queryForObject(sqlForCount, Integer.class);
-            roleList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabRole.class), (page - 1) * size, size);
+            roleList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabRole.class));
         }
 
-        //遍历角色信息，通过角色id获取对应权限信息存入角色实体类封装资源实体（一对多）
-        for (TabRole tabRole : roleList) {
-            for (TabPermission permission : getPermissionListByRole(tabRole.getId())) {
-                tabRole.getTabPermissions().add(permission);
-            }
-        }
+//        //遍历角色信息，通过角色id获取对应权限信息存入角色实体类封装资源实体（一对多）
+//        for (TabRole tabRole : roleList) {
+//            for (TabPermission permission : getPermissionListByRole(tabRole.getId())) {
+//                tabRole.getTabPermissions().add(permission);
+//            }
+//        }
         return new PageResult<>(page, size, totalCount, roleList);
     }
 
-    /**
-     * 根据角色id获取对应权限信息
-     *
-     * @param rid 角色id
-     * @return
-     */
-    private List<TabPermission> getPermissionListByRole(String rid) {
-        String permissionSql = "select p.id,p.name,p.remark from tab_permission p RIGHT JOIN  tab_role_permission rp on p.id=rp.sys_permission_id left JOIN  tab_role r on r.id=rp.sys_role_id where r.id=?";
+    @Override
+    public List<TabPermission> queryPermissionListByRole(String rid) {
+        String permissionSql = "select p.id from tab_permission p RIGHT JOIN  tab_role_permission rp on p.id=rp.sys_permission_id left JOIN  tab_role r on r.id=rp.sys_role_id where r.id=?";
         List<TabPermission> permissions = jdbcTemplate.query(permissionSql, new BeanPropertyRowMapper<>(TabPermission.class), rid);
         if (permissions.size() > 0) {
             for (int i = 0; i < permissions.size(); i++) {
@@ -102,48 +111,32 @@ public class RoleDaoImpl implements RoleDao {
     }
 
     @Override
-    public String addRole(String name, String code) {
-        Timestamp timestamp = new Timestamp(new Date().getTime());
-        //通过jdbctemplate返回主键
-        KeyHolder keyHolder = new GeneratedKeyHolder();
+    public void addRole(String name, String code) {
         String sql = "insert into tab_role(code,name,available,create_time) values(?,?,?,?)";
-        jdbcTemplate.update(new PreparedStatementCreator() {
-            @Override
-            public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
-                PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-                ps.setString(1, new String(code).toUpperCase());
-                ps.setString(2, new String(name).toUpperCase());
-                ps.setString(3, "1");
-                ps.setTimestamp(4, timestamp);
-                return ps;
-            }
-        }, keyHolder);
-        //获取主键id进行返回
-        String keyid = keyHolder.getKey().toString();
-        return keyid;
+        jdbcTemplate.update(sql,code,name,"1",new Date());
     }
 
     @Override
-    public void addRoleAndPermission(TabRolePermission tabRolePermission) {
+    public void addRoleAndPermission(String perId,String roleId) {
         String sql = "insert into tab_role_permission(sys_role_id,sys_permission_id,create_time,last_update_time) values(?,?,?,?)";
-        jdbcTemplate.update(sql, tabRolePermission.getSysRoleId(),
-                tabRolePermission.getSysPermissionId(),
+        jdbcTemplate.update(sql, roleId,
+                perId,
                 new Date(),
-                tabRolePermission.getLastUpdateTime());
+                new Date());
     }
 
     @Override
     public TabRole queryRoleById(String roleId) {
         TabRole tabRole = selectKeyOfValue("id", roleId, null);
-        if (tabRole != null) {
-            //获取对应角色
-            List<TabPermission> permissionListByRole = getPermissionListByRole(tabRole.getId());
-            for (TabPermission tabPermission : permissionListByRole) {
-                tabRole.getTabPermissions().add(tabPermission);
-            }
-            return tabRole;
-        }
-        return null;
+//        if (tabRole != null) {
+//            //获取对应角色
+//            List<TabPermission> permissionListByRole = queryPermissionListByRole(tabRole.getId());
+//            for (TabPermission tabPermission : permissionListByRole) {
+//                tabRole.getTabPermissions().add(tabPermission);
+//            }
+//            return tabRole;
+//        }
+        return tabRole;
     }
 
     @Override
@@ -156,18 +149,9 @@ public class RoleDaoImpl implements RoleDao {
     }
 
     @Override
-    public List<TabRolePermission> queryRoleOrPerForList(String roleId, String perId) {
-        List<TabRolePermission> tabRolePermissionList = new ArrayList<>();
-        String sql = "select id from tab_role_permission where 1=1 ";
-        if (StringUtils.isNotBlank(roleId)) {
-            sql += "and sys_role_id=? ";
-            tabRolePermissionList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabRolePermission.class), roleId);
-        } else if (StringUtils.isNotBlank(perId)) {
-            sql += "and sys_permission_id=?";
-            tabRolePermissionList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabRolePermission.class), perId);
-        } else {
-            tabRolePermissionList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabRolePermission.class));
-        }
+    public List<TabRolePermission> queryRelationByRoleId(String roleId) {
+        String sql = "select id from tab_role_permission where 1=1 and sys_role_id=?";
+        List<TabRolePermission> tabRolePermissionList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabRolePermission.class), roleId);
         return tabRolePermissionList;
     }
 

@@ -1,7 +1,11 @@
 package com.czkj.common.entity;
 
 import io.swagger.annotations.ApiModelProperty;
+import org.hibernate.validator.constraints.Length;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -17,12 +21,18 @@ public class TabSubscriber implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @ApiModelProperty(value="主键id",name="id")
+    @NotBlank(message = "登录账号不能为空")
     private String id;
 
     @ApiModelProperty(value="手机号",name="mobile",required = true)
+    @NotBlank(message = "请输入手机号")
+    @Pattern(regexp="^1[34578]\\d{9}$",message="手机号码格式不正确")
     private String mobile;
 
     @ApiModelProperty(value="密码",name="password",required = true)
+    @NotBlank(message = "请输入密码")
+    @Length(min = 6,max = 18,message = "密码长度必须在6-12位之间")
+    @Pattern(regexp = "^[a-zA-Z]\\\\w{5,17}$",message = "只能包含字符、数字和下划线")
     private String password;
 
     @ApiModelProperty(value="客户id",name="custid",hidden = true)

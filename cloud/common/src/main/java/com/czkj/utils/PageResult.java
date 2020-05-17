@@ -12,22 +12,22 @@ public class PageResult<T>{
     /**
      * 当前页
      */
-    private int currentPage;
+    private Integer currentPage;
 
     /**
      * 每页显示条数
      */
-    private int size;
+    private Integer size;
 
     /**
      * 总条数
      */
-    private int totalCount;
+    private Integer totalCount;
 
     /**
      * 总页面
      */
-    private int totalPage;
+    private Integer totalPage;
 
     /**
      * 当前页显示数据
@@ -37,35 +37,39 @@ public class PageResult<T>{
     public PageResult() {
     }
 
-    public PageResult(int currentPage, int size, int totalCount, List<T> items) {
+    public PageResult(Integer currentPage, Integer size, Integer totalCount, List<T> items) {
         this.currentPage = currentPage;
         this.size = size;
         this.totalCount = totalCount;
         this.items = items;
     }
 
-    public int getCurrentPage() {
+    public Integer getCurrentPage() {
         return currentPage;
     }
 
-    public void setCurrentPage(int currentPage) {
+    public void setCurrentPage(Integer currentPage) {
         this.currentPage = currentPage;
     }
 
-    public int getSize() {
+    public Integer getSize() {
         return size;
     }
 
-    public void setSize(int size) {
+    public void setSize(Integer size) {
         this.size = size;
     }
 
-    public int getTotalCount() {
+    public Integer getTotalCount() {
         return totalCount;
     }
 
-    public void setTotalCount(int totalCount) {
+    public void setTotalCount(Integer totalCount) {
         this.totalCount = totalCount;
+    }
+
+    public void setTotalPage(Integer totalPage) {
+        this.totalPage = totalPage;
     }
 
     public List<T> getItems() {
@@ -74,10 +78,6 @@ public class PageResult<T>{
 
     public void setItems(List<T> items) {
         this.items = items;
-    }
-
-    public void setTotalPage(int totalPage) {
-        this.totalPage = totalPage;
     }
 
     public int getTotalPage() {

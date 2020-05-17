@@ -1,5 +1,6 @@
 package com.czkj.role.dao;
 
+import com.czkj.common.entity.TabPermission;
 import com.czkj.common.entity.TabRole;
 import com.czkj.common.entity.TabRolePermission;
 import com.czkj.utils.PageResult;
@@ -21,7 +22,14 @@ public interface RoleDao {
      * @param available 是否可用
      * @return
      */
-    PageResult<TabRole> queryRoleList(int page, int size, String roleName, String available);
+    PageResult<TabRole> queryRoleList(Integer page, Integer size, String roleName, String available);
+
+    /**
+     * 根据角色id获取对应权限信息
+     * @param rid 角色主键
+     * @return
+     */
+    List<TabPermission> queryPermissionListByRole(String rid);
 
     /**
      * 添加角色信息
@@ -29,14 +37,15 @@ public interface RoleDao {
      * @param name 角色名
      * @param code 角色编码
      */
-    String addRole(String name, String code);
+    void addRole(String name, String code);
 
     /**
      * 添加角色及对应权限关系
      *
-     * @param tabRolePermission
+     * @param perId 权限id
+     * @param roleId 角色id
      */
-    void addRoleAndPermission(TabRolePermission tabRolePermission);
+    void addRoleAndPermission(String perId,String roleId);
 
     /**
      * 查询对应角色信息
@@ -54,13 +63,12 @@ public interface RoleDao {
     void updateRoleById(TabRole tabRole);
 
     /**
-     * 根据角色id或者对应权限id获取关系表数据
+     * 根据角色id获取关系表数据
      *
      * @param roleId 角色id
-     * @param perId  权限id
      * @return
      */
-    List<TabRolePermission> queryRoleOrPerForList(String roleId, String perId);
+    List<TabRolePermission> queryRelationByRoleId(String roleId);
 
     /**
      * 删除角色权限关系表指定指定角色id数据

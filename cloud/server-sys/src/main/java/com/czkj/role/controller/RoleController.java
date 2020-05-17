@@ -1,8 +1,10 @@
 package com.czkj.role.controller;
 
+import com.czkj.common.entity.TabPermission;
 import com.czkj.common.entity.TabRole;
 import com.czkj.common.entity.TabRolePermission;
 import com.czkj.exception.ExceptionHandleAdvice;
+import com.czkj.permission.service.MenuService;
 import com.czkj.res.Response;
 import com.czkj.role.service.RoleService;
 import com.czkj.utils.PageResult;
@@ -15,8 +17,12 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,6 +39,9 @@ public class RoleController {
     @Autowired
     private RoleService roleService;
 
+    @Autowired
+    private MenuService menuService;
+
     private static final Logger log = LoggerFactory.getLogger(RoleController.class);
 
     @ApiOperation(value = "显示角色列表（分页显示）", notes = "显示角色列表（分页显示）")
@@ -41,8 +50,9 @@ public class RoleController {
             @ApiImplicitParam(name = "roleName", value = " 角色名-用于模糊查询", paramType = "query", required = false, dataType = "String"),
             @ApiImplicitParam(name = "available", value = " 是否可用标识", paramType = "query", required = false, dataType = "String")})
     @GetMapping("/getRoleList")
-    public PageResult getRoleList(int currentPage, int size, String roleName, String available) {
-        return roleService.queryRoleList(currentPage, size, roleName, available);
+    public Response<PageResult> getRoleList(Integer currentPage, Integer size, String roleName, String available) {
+        PageResult<TabRole> pageResult = roleService.queryRoleList(currentPage, size, roleName, available);
+        return Response.success().data(pageResult);
     }
 
     /**
@@ -52,16 +62,21 @@ public class RoleController {
      * @param code 角色编码
      * @return
      */
-    private Response validateRoleExit(String name, String code, String keyid) {
+    private Response validateRole(String name, String code, String keyId, BindingResult bindingResult) {
         log.info("角色名:" + name + "," + "角色编码:" + code);
+        if (null != bindingResult) {
+            if (bindingResult.hasErrors()) {
+                return Response.failure("2021", bindingResult.getFieldError().getDefaultMessage());
+            }
+        }
         if (StringUtils.isNotBlank(name)) {
-            boolean result = roleService.validateRoleExit(name, null, keyid);
+            boolean result = roleService.validateRoleExit(name, null, keyId);
             if (!result) {
                 return Response.failure("4015", "角色名已存在");
             }
         }
         if (StringUtils.isNotBlank(code)) {
-            boolean result = roleService.validateRoleExit(null, code, keyid);
+            boolean result = roleService.validateRoleExit(null, code, keyId);
             if (!result) {
                 return Response.failure("4016", "角色编码已存在");
             }
@@ -70,13 +85,13 @@ public class RoleController {
     }
 
     @ApiOperation(value = "保存角色信息", notes = "保存角色信息")
-    @RequestMapping(value = "/saveRole",produces = "application/json",method = RequestMethod.POST)
-    public Response saveRole(@RequestBody TabRole tabRole) {
+    @RequestMapping(value = "/saveRole", produces = "application/json", method = RequestMethod.POST)
+    public Response saveRole(@RequestBody @Validated TabRole tabRole,BindingResult bindingResult) {
         log.info("角色名:" + tabRole.getName(), "," + "角色编码:" + tabRole.getCode());
         log.info("权限id:" + tabRole.getTabPermissions());
-        Response response = validateRoleExit(tabRole.getName(), tabRole.getCode(), null);
+        Response response = validateRole(tabRole.getName(), tabRole.getCode(), null,bindingResult);
         //验证成功则进行添加
-        if (response.getCode().equals("0")) {
+        if ("0".equals(response.getCode())) {
             log.info("检验结果:" + response.getCode());
             boolean result = roleService.saveRole(tabRole);
             if (result) {
@@ -88,20 +103,23 @@ public class RoleController {
     }
 
     @ApiOperation(value = "获取对应角色信息", notes = "获取对应角色信息")
-    @ApiImplicitParam(name = "id", value = "角色id", required = true, paramType = "query", dataType = "String")
+    @ApiImplicitParam(name = "roleId", value = "角色id", required = true, paramType = "query", dataType = "String")
     @GetMapping("/getRoleById")
-    public Response getRoleById(@RequestParam("id") String roleId) {
+    public Response getRoleById(String roleId) {
         TabRole tabRole = roleService.queryRoleById(roleId);
         return Response.success(tabRole);
     }
 
     @ApiOperation(value = "修改指定角色信息", notes = "修改指定角色信息")
-    @RequestMapping(value = "/updateRole",produces = "application/json",method = RequestMethod.PUT)
-    public Response updateRole(@RequestBody TabRole tabRole) {
-        System.out.println("角色id："+tabRole.getId());
-        Response response = validateRoleExit(tabRole.getName(), tabRole.getCode(),tabRole.getId());
+    @RequestMapping(value = "/updateRole", produces = "application/json", method = RequestMethod.PUT)
+    public Response updateRole(@RequestBody @Validated TabRole tabRole,BindingResult bindingResult) {
+        System.out.println("角色id：" + tabRole.getId());
+        if (null==tabRole.getId()){
+            return Response.failure("2565","主键不能为空");
+        }
+        Response response = validateRole(tabRole.getName(), tabRole.getCode(), tabRole.getId(),bindingResult);
         //验证成功则进行添加
-        if (response.getCode().equals("0")) {
+        if ("0".equals(response.getCode())) {
             log.info("权限id:" + tabRole.getTabPermissions());
             boolean result = roleService.updateRoleById(tabRole);
             if (result) {
@@ -113,9 +131,12 @@ public class RoleController {
     }
 
     @ApiOperation(value = "删除角色", notes = "删除角色")
-    @ApiImplicitParam(name = "roleId", value = "角色id，删除", paramType = "query", required = true, dataType = "String[]")
+    @ApiImplicitParam(name = "roleId", value = "角色id，删除", paramType = "query", required = true, dataType = "String")
     @DeleteMapping("/deleteRole")
     public Response deleteRole(String roleId) {
+        if (StringUtils.isBlank(roleId)){
+            return Response.failure("2565","主键不能为空");
+        }
         List<TabRolePermission> tabRolePermissionList = roleService.queryByRoleId(roleId);
         if (tabRolePermissionList.size() > 0) {
             return Response.failure("4014", "不能删除绑定权限的角色");
@@ -126,5 +147,47 @@ public class RoleController {
         }
         return Response.failure("删除失败");
 
+    }
+
+    @ApiOperation(value = "获取对应权限id", notes = "获取对应权限id")
+    @ApiImplicitParam(name = "roleId", value = "角色id", paramType = "query", required = true, dataType = "String")
+    @GetMapping("/getPerIdByRoleId")
+    public List<String> getPerIdByRoleId(String roleId) {
+        List<String> perIdList = new ArrayList<>();
+        List<TabPermission> permissionList = roleService.queryPermissionListByRole(roleId);
+        if (permissionList.size() > 0) {
+            for (TabPermission tabPermission : permissionList) {
+                String id = tabPermission.getId();
+                perIdList.add(id);
+            }
+        }
+        return perIdList;
+    }
+
+    @ApiOperation(value = "角色授权", notes = "角色授权")
+    @ApiImplicitParams({@ApiImplicitParam(name = "roleId", value = "角色id", paramType = "query", required = true, dataType = "String"),
+            @ApiImplicitParam(name = "perIds", value = "权限id数组", paramType = "query", required = true, allowMultiple = true, dataType = "String")
+    })
+    @PostMapping("/savePermission")
+    public Response savePermission(String[] perIds, String roleId) {
+        if (perIds.length<0){
+            return Response.failure("5034","请选择权限");
+        }
+        if (StringUtils.isBlank(roleId)){
+            return Response.failure("5033","主键不能为空");
+        }
+        boolean result = roleService.savePermissionAndRole(perIds, roleId);
+        if (result) {
+            return Response.success("绑定成功");
+        }
+        return Response.failure("绑定失败，请检查原因");
+    }
+
+    @ApiOperation(value = "获取所有权限信息", notes = "获取所有权限信息")
+    @GetMapping("/getPermissionList")
+    public List<TabPermission> getPermissionList() {
+        PageResult<TabPermission> pageResult = menuService.getAllList("1", null, null);
+        List<TabPermission> items = pageResult.getItems();
+        return items;
     }
 }

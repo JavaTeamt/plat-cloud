@@ -36,17 +36,17 @@ public class MenuController {
             @ApiImplicitParam(name = "size", value = "每页显示条数", paramType = "query", required = true, dataType = "int"),
             @ApiImplicitParam(name = "available", value = " 是否可用标识", paramType = "query", required = false, dataType = "String")})
     @GetMapping("/getAllList")
-    public Response<PageResult> getAllList(String available,int currentPage,int size) {
-        log.info("是否可用：" + available+",当前页："+currentPage+",每页显示条数："+size);
+    public Response<PageResult> getAllList(String available, Integer currentPage, Integer size) {
+        log.info("是否可用：" + available + ",当前页：" + currentPage + ",每页显示条数：" + size);
         PageResult<TabPermission> pageResult = menuService.getAllList(available, currentPage, size);
         return Response.success().data(pageResult);
     }
 
     @ApiOperation(value = "新增权限及添加对应URL", notes = "新增权限及添加对应URL")
-    @RequestMapping(value = "/savePermission",produces = "application/json",method = RequestMethod.POST)
+    @RequestMapping(value = "/savePermission", produces = "application/json", method = RequestMethod.POST)
     public Response savePermission(@RequestBody TabPermission tabPermission) {
-        Response response = vlidateExit(tabPermission);
-        if (response.getCode().equals("0")) {
+        Response response = vlidate(tabPermission);
+        if ("0".equals(response.getCode())) {
             boolean result = menuService.savePermission(tabPermission);
             if (result) {
                 return Response.success().message("新增成功");
@@ -65,10 +65,13 @@ public class MenuController {
     }
 
     @ApiOperation(value = "修改对应权限数据", notes = "修改对应权限数据")
-    @RequestMapping(value = "/updatePerByKey",produces = "application/json",method = RequestMethod.PUT)
+    @RequestMapping(value = "/updatePerByKey", produces = "application/json", method = RequestMethod.PUT)
     public Response updatePerByKey(@RequestBody TabPermission tabPermission) {
-        Response response = vlidateExit(tabPermission);
-        if (response.getCode().equals("0")) {
+        if (StringUtils.isBlank(tabPermission.getId())){
+            return Response.failure("5069","主键不能为空");
+        }
+        Response response = vlidate(tabPermission);
+        if ("0".equals(response.getCode())) {
             boolean result = menuService.updatePerByKey(tabPermission);
             if (result) {
                 return Response.success().message("修改成功");
@@ -78,18 +81,20 @@ public class MenuController {
         return response;
     }
 
-    private Response vlidateExit(TabPermission tabPermission) {
+    private Response vlidate(TabPermission tabPermission) {
         //先进行表单的一些校验，校验成功进行用户注册
         if (StringUtils.isNotBlank(tabPermission.getName())) {
-            boolean result = menuService.queryExit(tabPermission.getName(), null,tabPermission.getId());
+            boolean result = menuService.queryExit(tabPermission.getName(), null, tabPermission.getId());
             if (!result) {
                 //权限已存在
-                return Response.failure("5120", tabPermission.getName()+"权限已存在");
+                return Response.failure("5120", tabPermission.getName() + "权限已存在");
             }
+        } else {
+            return Response.failure("5026", "权限名不能为空");
         }
-        if (tabPermission.getUrlList() != null && tabPermission.getUrlList().size() > 0) {
+        if (null != tabPermission.getUrlList() && tabPermission.getUrlList().size() > 0) {
             for (int i = 0; i < tabPermission.getUrlList().size(); i++) {
-                boolean result = menuService.queryExit(null, tabPermission.getUrlList().get(i).getName(),tabPermission.getId());
+                boolean result = menuService.queryExit(null, tabPermission.getUrlList().get(i).getName(), tabPermission.getId());
                 if (!result) {
                     //URL已存在
                     return Response.failure("5121", "URL:" + tabPermission.getUrlList().get(i).getName() + "已存在");
@@ -100,11 +105,14 @@ public class MenuController {
     }
 
     @ApiOperation(value = "删除对应权限", notes = "删除对应权限")
-    @ApiImplicitParam(name = "key", value = "主键id", required = true,paramType = "query", dataType = "String")
+    @ApiImplicitParam(name = "key", value = "主键id", required = true, paramType = "query", dataType = "String")
     @PutMapping("/deleteTabPermission")
     public Response deleteTabPermission(String key) {
+        if (StringUtils.isBlank(key)){
+            return Response.failure("5068","主键不能为空");
+        }
         TabPermission permissionAndRole = menuService.getPermissionAndRole(key);
-        if (permissionAndRole != null) {
+        if (null != permissionAndRole) {
             return Response.failure("4008", permissionAndRole.getName() + "权限不能废弃，有角色关联-_-");
         } else {
             boolean result = menuService.deleteTabpermission(key);
@@ -119,6 +127,9 @@ public class MenuController {
     @ApiImplicitParam(name = "key", value = "主键id", required = true, paramType = "query", dataType = "String")
     @PutMapping("/enablePerById")
     public Response enablePerById(String key) {
+        if (StringUtils.isBlank(key)){
+            return Response.failure("5070","主键不能为空");
+        }
         boolean b = menuService.enablePermission(key);
         if (b) {
             return Response.success().message("启用成功");

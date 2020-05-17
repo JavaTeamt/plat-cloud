@@ -1,5 +1,6 @@
 package com.czkj.role.service;
 
+import com.czkj.common.entity.TabPermission;
 import com.czkj.common.entity.TabRole;
 import com.czkj.common.entity.TabRolePermission;
 import com.czkj.utils.PageResult;
@@ -22,7 +23,7 @@ public interface RoleService {
      * @param available 是否可用
      * @return
      */
-    PageResult queryRoleList(int page, int size, String roleName, String available);
+    PageResult queryRoleList(Integer page, Integer size, String roleName, String available);
 
     /**
      * 校验角色信息是否存在
@@ -49,10 +50,11 @@ public interface RoleService {
 
     /**
      * 绑定角色权限关系存储关系数据
-     * @param tabRole
+     * @param perIds 权限id数组
+     * @param roleId 角色id
      * @return
      */
-    boolean savePermissionAndRole(TabRole tabRole);
+    boolean savePermissionAndRole(String[] perIds,String roleId);
 
     /**
      * 修改角色信息
@@ -74,4 +76,12 @@ public interface RoleService {
      * @return
      */
     List<TabRolePermission> queryByRoleId(String roleId);
+
+    /**
+     * 获取角色对应权限id，用于id绑定，显示用户绑定的权限
+     * @param rid 角色id
+     * @return
+     */
+    List<TabPermission> queryPermissionListByRole(String rid);
+
 }

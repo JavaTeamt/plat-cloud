@@ -23,7 +23,7 @@ public interface MenuDao {
      * @param size 每页显示条数
      * @return
      */
-    PageResult<TabPermission> queryAllList(String available, int currentPage, int size);
+    PageResult<TabPermission> queryAllList(String available, Integer currentPage, Integer size);
 
 
     /**
@@ -42,11 +42,9 @@ public interface MenuDao {
 
     /**
      * 新增权限URL
-     * @param url url
-     * @param perId 权限id
-     * @param remark 权限url描述
+     * @param tabPermissionUrl
      */
-    void savePerUrl(String url,  String perId, String remark,Date lastUpdateTime);
+    void savePerUrl(TabPermissionUrl tabPermissionUrl);
 
     /**
      * 根据主键获取权限信息

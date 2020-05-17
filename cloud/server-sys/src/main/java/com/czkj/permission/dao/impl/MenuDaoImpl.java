@@ -34,10 +34,8 @@ public class MenuDaoImpl implements MenuDao {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
     @Override
-    public PageResult<TabPermission> queryAllList(String available, int currentPage, int size) {
+    public PageResult<TabPermission> queryAllList(String available, Integer currentPage, Integer size) {
 
         //总条数
         int totalCount = 0;
@@ -47,25 +45,32 @@ public class MenuDaoImpl implements MenuDao {
         String sqlByCount = "select count(1) from tab_permission where 1=1 ";
 
         String sql = "select id,name,remark from tab_permission where 1=1 ";
-
-        if (StringUtils.isNotBlank(available)) {
-            sql += "and available = ? limit ?,?";
-            sqlByCount += "and available = ?";
-            totalCount = jdbcTemplate.queryForObject(sqlByCount, Integer.class, available);
-            permissionList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabPermission.class), available,currentPage,size);
-        } else {
-            sql += "limit ?,?";
-            totalCount = jdbcTemplate.queryForObject(sqlByCount, Integer.class);
-            permissionList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabPermission.class),currentPage,size);
-        }
-        //遍历过去URL信息
-        if (permissionList.size() > 0) {
-            for (int i = 0; i < permissionList.size(); i++) {
-                //根据权限id获取对应URL
-                List<TabPermissionUrl> tabPermissionUrls = queryAllUrlList(permissionList.get(i).getId());
-                permissionList.get(i).setUrlList(tabPermissionUrls);
+        if (null != currentPage && null != size) {
+            if (StringUtils.isNotBlank(available)) {
+                sql += "and available = ? limit ?,?";
+                sqlByCount += "and available = ?";
+                totalCount = jdbcTemplate.queryForObject(sqlByCount, Integer.class, available);
+                permissionList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabPermission.class), available, (currentPage - 1) * size, size);
+            } else {
+                sql += "limit ?,?";
+                totalCount = jdbcTemplate.queryForObject(sqlByCount, Integer.class);
+                permissionList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabPermission.class), (currentPage - 1) * size, size);
             }
+        } else if (StringUtils.isNotBlank(available)) {
+            sql += "and available = ?";
+            permissionList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabPermission.class), available);
+        } else {
+            permissionList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(TabPermission.class));
         }
+
+//        //遍历过去URL信息
+//        if (permissionList.size() > 0) {
+//            for (int i = 0; i < permissionList.size(); i++) {
+//                //根据权限id获取对应URL
+//                List<TabPermissionUrl> tabPermissionUrls = queryAllUrlList(permissionList.get(i).getId());
+//                permissionList.get(i).setUrlList(tabPermissionUrls);
+//            }
+//        }
         return new PageResult<>(currentPage, size, totalCount, permissionList);
     }
 
@@ -101,10 +106,10 @@ public class MenuDaoImpl implements MenuDao {
     }
 
     @Override
-    public void savePerUrl(String url, String perId, String remark, Date lastUpdateTime) {
+    public void savePerUrl(TabPermissionUrl tabPermissionUrl) {
         String sql = "insert into tab_permission_url(name,per_id,available,remark,create_time,last_update_time) values(?,?,?,?,?,?)";
-        System.out.println("创建时间为：" + new Date() + ",最后修改日期为：" + lastUpdateTime);
-        jdbcTemplate.update(sql, url, perId, "1", remark, new Date(), lastUpdateTime);
+        System.out.println("创建时间为：" + new Date() + ",最后修改日期为：" + tabPermissionUrl.getLastUpdateTime());
+        jdbcTemplate.update(sql, tabPermissionUrl.getName(), tabPermissionUrl.getPerId(), "1", tabPermissionUrl.getRemark(), new Date(), tabPermissionUrl.getLastUpdateTime());
     }
 
     @Override

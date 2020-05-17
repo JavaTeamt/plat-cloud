@@ -72,10 +72,10 @@ public interface UserService {
     /**
      * 实名认证
      * @param tabCustomer 实体接收参数数据
-     * @param id 登录账号
+     * @param userId 登录账号
      * @return
      */
-    boolean Authentication(TabCustomer tabCustomer, String id);
+    boolean Authentication(TabCustomer tabCustomer, String userId);
 
     /**
      * 显示用户列表（分页）
@@ -83,7 +83,7 @@ public interface UserService {
      * @param size 每页显示条数
      * @return
      */
-    PageResult getUserList(int currentPage, int size);
+    PageResult getUserList(Integer currentPage, Integer size);
 
     /**
      * 获取用户对应角色
@@ -98,20 +98,29 @@ public interface UserService {
      * @param tabSubscriber 实体类接收参数
      * @return
      */
-    boolean updateUserAndRole(TabSubscriber tabSubscriber);
+    boolean updateUser(TabSubscriber tabSubscriber);
 
     /**
-     * 新增用户(包括实名，及添加对角色)
+     * 新增用户
      * @param tabSubscriber 用户实体类
      * @return
      */
-    boolean addUserAndRole(TabSubscriber tabSubscriber);
+    boolean saveUser(TabSubscriber tabSubscriber);
+
+    /**
+     * 新增用户角色
+     * @param roleIds 角色id
+     * @param userId 用户登录账号
+     * @return
+     */
+    boolean saveRoleByUser(String[] roleIds,String userId);
 
     /**
      * 删除用户
-     * @param userid 登录账号
+     * @param userId 登录账号
      * @return
      */
-    boolean deleteUser(String userid);
+    boolean deleteUser(String userId);
+
 
 }

@@ -78,7 +78,7 @@ public interface UserDao<T> {
      * @param size 每页显示条数
      * @return
      */
-    PageResult<TabSubscriber> seletAllUser(int currentPage, int size);
+    PageResult<TabSubscriber> seletAllUser(Integer currentPage, Integer size);
 
     /**
      * 获取用户对应角色
@@ -109,9 +109,10 @@ public interface UserDao<T> {
 
     /**
      * 添加用户角色关系绑定记录
-     * @param tabUserRole 实体类接收参数
+     * @param roleId 角色id数组
+     * @param userId 用户id
      */
-    void saveUserAndRole(TabUserRole tabUserRole);
+    void saveUserAndRole(String roleId,String userId);
 
     /**
      * 编辑用户

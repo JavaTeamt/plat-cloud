@@ -2,6 +2,7 @@ package com.czkj.common.entity;
 
 import io.swagger.annotations.ApiModelProperty;
 
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -20,12 +21,14 @@ public class TabRole implements Serializable {
     /**
      * 角色编码
      */
+    @NotBlank(message = "角色编码不能为空")
     @ApiModelProperty(value="角色编码",name="code",required = true)
     private String code;
 
     /**
      * 角色名
      */
+    @NotBlank(message = "角色名不能为空")
     @ApiModelProperty(value="角色名",name="name",required = true)
     private String name;
 
